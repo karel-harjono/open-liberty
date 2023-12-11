@@ -348,7 +348,7 @@ public class SSLConfig {
             return false;
         }
 
-        return Boolean.valueOf(sslProps.getProperty(Constants.SSLPROP_HOSTNAME_VERIFICATION, "false"));
+        return Boolean.valueOf(sslProps.getProperty(Constants.SSLPROP_HOSTNAME_VERIFICATION, "true"));
     }
 
     /**
