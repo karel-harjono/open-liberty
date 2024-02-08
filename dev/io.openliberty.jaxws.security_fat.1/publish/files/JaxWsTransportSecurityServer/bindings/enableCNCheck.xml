@@ -4,7 +4,7 @@
   <service-ref name="service/SayHelloPojoService">
     <port name="SayHelloPojoPort" 
        namespace="http://ibm.com/ws/jaxws/transport/security/"
-       ssl-ref="customizeSSLConfig"
+       ssl-ref="testEnableCNCheckSSLConfig"
        key-alias="user0"
      />
      <properties http.conduit.tlsClientParameters.disableCNCheck="false" />
@@ -13,7 +13,7 @@
   <service-ref name="service/SayHelloStatelessService">
     <port name="SayHelloStatelessPort" 
        namespace="http://ibm.com/ws/jaxws/transport/security/"
-       ssl-ref="customizeSSLConfig"
+       ssl-ref="testEnableCNCheckSSLConfig"
        key-alias="user0"
      />
      <properties http.conduit.tlsClientParameters.disableCNCheck="false" />
@@ -22,7 +22,7 @@
   <service-ref name="service/SayHelloSingletonService">
     <port name="SayHelloSingletonPort" 
        namespace="http://ibm.com/ws/jaxws/transport/security/"
-       ssl-ref="customizeSSLConfig"
+       ssl-ref="testEnableCNCheckSSLConfig"
        key-alias="user1"
      />
      <properties http.conduit.tlsClientParameters.disableCNCheck="false" />

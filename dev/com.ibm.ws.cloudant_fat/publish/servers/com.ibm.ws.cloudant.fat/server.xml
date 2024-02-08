@@ -33,7 +33,8 @@
   <cloudant id="withSSL" jndiName="cloudant/withSSL" sslRef="defaultSSLConfig" libraryRef="CloudantLib" url="${cloudant_url_secure}">
   	<containerAuthData user="${cloudant_username}" password="${cloudant_password}"/>
   </cloudant>
-  <ssl id="defaultSSLConfig" keyStoreRef="defaultKeyStore"/>
+  <sslDefault httpHostNameVerification="false" />
+  <ssl id="defaultSSLConfig" keyStoreRef="defaultKeyStore" verifyHostname="false"/>
   <keyStore id="defaultKeyStore" location="${server.config.dir}/security/keystore.jks" type="JKS" password="liberty" />
   
   <cloudant id="nestedSSL" jndiName="cloudant/nestedSSL" libraryRef="CloudantLib" url="${cloudant_url_secure}">
