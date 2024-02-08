@@ -14,12 +14,13 @@
 -->
 <server>
 
-	<sslDefault sslRef="DefaultSSLSettings" />
+	<sslDefault sslRef="DefaultSSLSettings" hostNameVerificationEnabled="false" />
 	<ssl
 		id="DefaultSSLSettings"
 		keyStoreRef="rsa_key"
 		trustStoreRef="rsa_trust"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true"
+		verifyHostname="false" />
 	<keyStore
 		id="myKeyStore"
 		password="Liberty"

@@ -18,13 +18,15 @@
 		id="DefaultSSLSettings"
 		keyStoreRef="rsa_key"
 		trustStoreRef="rsa_trust"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true"
+		verifyHostname="false" />
 		
 	<ssl
          id="BadTrustSSLSettings"
          keyStoreRef="rsa_key"
          trustStoreRef="bad_trust"
-         clientAuthenticationSupported="true" />
+         clientAuthenticationSupported="true"
+		 verifyHostname="false" />
          
     <keyStore
 		id="rsa_trust"

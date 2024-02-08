@@ -32,7 +32,8 @@
 		id="SpecificSSLSettings"
 		keyStoreRef="rsa_key"
 		trustStoreRef="rsa_trust"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true"
+		verifyHostname="false" />
 	<keyStore
 		id="rsa_key"
 		password="Liberty"

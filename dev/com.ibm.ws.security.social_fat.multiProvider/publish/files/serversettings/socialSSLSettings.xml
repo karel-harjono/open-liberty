@@ -12,12 +12,12 @@
  -->
 <server>
 
-	<sslDefault sslRef="DefaultSSLSettings" />
+	<sslDefault sslRef="DefaultSSLSettings" httpHostNameVerification="false" />
 	<ssl
 		id="DefaultSSLSettings"
 		keyStoreRef="rsa_key"
 		trustStoreRef="rsa_trust_for_all"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true" verifyHostname="false" />
 
 	<keyStore
 		id="rsa_key"
@@ -36,7 +36,7 @@
 		id="BadTrustSSLSettings"
 		keyStoreRef="rsa_key"
 		trustStoreRef="rsa_trust"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true" verifyHostname="false" />
 	<!-- <ssl id="BadKeySSLSettings" keyStoreRef="rsa_key" trustStoreRef="rsa_trust" 
 		clientAuthenticationSupported="true" /> -->
 	<keyStore

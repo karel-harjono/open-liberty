@@ -12,7 +12,7 @@
  -->
 <server>
 
-	<sslDefault sslRef="BadSSLSettings" />
+	<sslDefault sslRef="BadSSLSettings" httpHostNameVerification="false" />
 	<!-- 
 	<ssl
 		id="DefaultSSLSettings"
@@ -50,7 +50,8 @@
 		id="BadSSLSettings"
 		keyStoreRef="bad_key"
 		trustStoreRef="bad_trust"
-		clientAuthenticationSupported="true" />
+		clientAuthenticationSupported="true"
+		verifyHostname="false" />
 		
 	<keyStore
 		id="bad_key"
