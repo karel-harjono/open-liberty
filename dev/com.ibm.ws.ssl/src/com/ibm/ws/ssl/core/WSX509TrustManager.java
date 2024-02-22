@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -947,7 +948,8 @@ public final class WSX509TrustManager extends X509ExtendedTrustManager {
             } else {
                 // Hostname verification error
                 String extendedMessage = ex.getMessage();
-                Tr.error(tc, "ssl.client.handshake.error.CWPKI0824E", new Object[] { peerHost, extendedMessage });
+                String sanInfo = getHostnameVerificationSANInfo(chain);
+                Tr.error(tc, "ssl.client.handshake.error.CWPKI0824E", new Object[] { peerHost, chain[0].getSubjectDN(), sanInfo, extendedMessage });
                 throw ex;
             }
         } catch (Exception e) {
@@ -958,4 +960,27 @@ public final class WSX509TrustManager extends X509ExtendedTrustManager {
         }
     }
 
+    private String getHostnameVerificationSANInfo(X509Certificate[] chain) {
+        int GENERAL_NAME_DNSNAME = 2;
+        int GENERAL_NAME_IPADDRESS = 7;
+        X509Certificate certificate = chain[0];
+        ArrayList<String> sanInfo = new ArrayList<>();
+        try {
+            Collection<List<?>> subjectAltNames = certificate.getSubjectAlternativeNames();
+            if (subjectAltNames != null) {
+                for (List<?> sanEntry : subjectAltNames) {
+                    Integer sanType = (Integer) sanEntry.get(0);
+                    if (sanType == GENERAL_NAME_DNSNAME) {
+                        sanInfo.add("dnsName:" + sanEntry.get(1));
+                    }
+                    if (sanType == GENERAL_NAME_IPADDRESS) {
+                        sanInfo.add("ipAddress:" + sanEntry.get(1));
+                    }
+                }
+            }
+        } catch (CertificateParsingException e) {
+            // SAN cannot be decoded
+        }
+        return String.join(", ", sanInfo);
+    }
 }
