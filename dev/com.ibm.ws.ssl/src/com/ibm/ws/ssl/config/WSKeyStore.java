@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -33,8 +35,10 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -122,6 +126,7 @@ public class WSKeyStore extends Properties {
 
     private static final String IBMPKCS11Impl_PROVIDER_NAME = "IBMPKCS11Impl";
     private static final String SUNPKCS11_PROVIDER_NAME = "SunPKCS11";
+
     private final String contextProvider = JSSEProviderFactory.getInstance().getContextProvider();
 
     /** SafKeyring prefixes **/
@@ -131,6 +136,13 @@ public class WSKeyStore extends Properties {
     private static final String PREFIX_SAFKEYRINGJCE = "safkeyringjce:";
     private static final String PREFIX_SAFKEYRINGJCEHYBRID = "safkeyringjcehybrid:";
     private static final String PREFIX_SAFKEYRINGJCECCA = "safkeyringjcecca:";
+
+    /** Constant: controller root alias */
+    static final String CONTROLLER_ROOT_KEY_ALIAS = "controllerRoot";
+    /** Constant: member root alias */
+    static final String MEMBER_ROOT_KEY_ALIAS = "memberRoot";
+    /** Constant: server identity alias */
+    static final String SERVER_IDENTITY_KEY_ALIAS = "serverIdentity";
 
     private final Map<String, SerializableProtectedString> certAliasInfo = new HashMap<String, SerializableProtectedString>();
 
@@ -1234,6 +1246,88 @@ public class WSKeyStore extends Properties {
             Tr.exit(tc, "provideExpirationWarnings");
     }
 
+    public boolean isCollectiveCertSubjectAltNamesExist(WSKeyStore wsKeystore, String ksName) {
+        if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+            Tr.entry(tc, "isCollectiveCertSubjectAltNamesExist " + ksName);
+        KeyStore keystore = null;
+        try {
+            keystore = wsKeystore.getKeyStore(false, false, false);
+        } catch (Exception e) {
+            if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled())
+                Tr.debug(tc, "Exception getting the keystore, " + e);
+        }
+        if (keystore != null) {
+            try {
+                Enumeration<String> e = keystore.aliases();
+                if (e != null) {
+                    for (; e.hasMoreElements();) {
+                        String alias = e.nextElement();
+                        if (null == alias)
+                            continue;
+                        Certificate[] cert_chain = keystore.getCertificateChain(alias);
+                        if (null == cert_chain)
+                            continue;
+                        for (int i = 0; i < cert_chain.length; i++) {
+                            if (isDefaultServerIdentityCert((X509Certificate) cert_chain[i], alias)) {
+                                if (!isSanExist((X509Certificate) cert_chain[i])) {
+                                    Tr.warning(tc, "ssl.san.warning.CWPKI0050W", new Object[] { alias, ksName });
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled())
+                    Tr.debug(tc, "Exception checking certificate subject alternative names: " + e);
+                FFDCFilter.processException(e, getClass().getName(), "isSubjectAltNamesExist", this);
+                return false;
+            }
+        }
+
+        if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+            Tr.exit(tc, "isCollectiveCertSubjectAltNamesExist ", true);
+        return true;
+    }
+
+    private boolean isDefaultServerIdentityCert(X509Certificate x509Certificate, String alias) {
+        boolean result = false;
+        String issuerDN = x509Certificate.getIssuerX500Principal().getName();
+        if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+            Tr.debug(tc, "alias: " + alias + " issuer DN: " + issuerDN);
+        if (issuerDN != null && (issuerDN.contains(MEMBER_ROOT_KEY_ALIAS) || issuerDN.contains(CONTROLLER_ROOT_KEY_ALIAS))) {
+            String subjectDN = x509Certificate.getSubjectX500Principal().getName();
+            if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+                Tr.debug(tc, "subject DN: " + subjectDN);
+            if (!subjectDN.contains(MEMBER_ROOT_KEY_ALIAS) && !subjectDN.contains(CONTROLLER_ROOT_KEY_ALIAS)) {
+                result = true;
+            }
+        }
+
+        if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+            Tr.exit(tc, "isDefaultServerIdentityCert ", result);
+        return result;
+    }
+
+    private boolean isSanExist(X509Certificate x509Certificate) {
+        boolean result = false;
+        try {
+            Collection<List<?>> san = x509Certificate.getSubjectAlternativeNames();
+            if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+                Tr.debug(tc, "Certificate's Subject DN: " + x509Certificate.getSubjectX500Principal().getName() + " Subject Alternative Name: "
+                             + (san != null ? "<NOT NULL>" : "<NULL>"));
+            if (san != null)
+                result = true;
+
+        } catch (CertificateParsingException e) {
+            if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled())
+                Tr.debug(tc, "Exception getting Certifificate subject alternative name, " + e);
+        }
+        if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled())
+            Tr.exit(tc, "isSanExist ", result);
+        return result;
+    }
+
     /**
      * Print a warning about a certificate being expired or soon to be expired in
      * the keystore.
@@ -1734,6 +1828,9 @@ public class WSKeyStore extends Properties {
                 String host = InetAddress.getLocalHost().getCanonicalHostName();
                 san.add("dns:" + host);
             }
+            String ipAddresses = buildSanIpStringFromNetworkInterface();
+            if (ipAddresses != null)
+                san.add(ipAddresses);
         } catch (UnknownHostException e) {
             if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
                 Tr.debug(tc, "createCertSANInfo exception -> " + e.getMessage());
@@ -1829,6 +1926,43 @@ public class WSKeyStore extends Properties {
         if (tc.isEntryEnabled())
             Tr.exit(tc, "isGoodDNSName", true);
         return true;
+    }
+    
+    /**
+     *  This method builds subjectAltNames ip addresses from System's configured network interface
+     **/
+    private static String buildSanIpStringFromNetworkInterface() {
+        List<String> sanIpAddress = new ArrayList<String>();
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while(e.hasMoreElements()) {
+                NetworkInterface n = e.nextElement();
+                Enumeration<InetAddress> ee = n.getInetAddresses();
+                while (ee.hasMoreElements()) {
+                    InetAddress ip = ee.nextElement();
+                    if(ip instanceof Inet4Address){
+                        sanIpAddress.add(ip.getHostAddress());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // no network interfaces found for the system
+            if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
+                Tr.debug(tc, "buildSanIpStringFromNetworkInterface exception -> " + e.getMessage());
+            }
+            sanIpAddress.add("127.0.0.1");
+        }
+
+        // on Liberty consider using String.join(",", sanIpAddress); instead of below. (twas doesn't compile with String.join())
+        if (!sanIpAddress.isEmpty()) {
+            StringBuilder sb = new StringBuilder("ip:" + sanIpAddress.get(0).toString());
+            for (int i = 1; i < sanIpAddress.size(); i++) {
+                sb.append(",ip:");
+                sb.append(sanIpAddress.get(i).toString());
+            }
+            return sb.toString();
+        }
+        return null;
     }
 
     /**

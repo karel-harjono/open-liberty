@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -1268,6 +1268,21 @@ public class SSLUtils {
         } else {
             // Update engine with client side specific config parameters.
             engine.setUseClientMode(true);
+            boolean verifyHostname = config.getBooleanProperty(Constants.SSLPROP_HOSTNAME_VERIFICATION);
+            if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
+                Tr.debug(tc, "verifyHostname:  " + verifyHostname);
+            }
+            if (verifyHostname) {
+                String peerHostname = engine.getPeerHost();
+                config.getProperty(Constants.SSLPROP_SKIP_HOSTNAME_VERIFICATION_FOR_HOSTS);
+                String skipHostList = config.getProperty(Constants.SSLPROP_SKIP_HOSTNAME_VERIFICATION_FOR_HOSTS);
+                if (!Constants.isSkipHostnameVerificationForHosts(peerHostname, skipHostList)) {
+                    sslParameters.setEndpointIdentificationAlgorithm("HTTPS"); // enable hostname verification
+                    if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
+                        Tr.debug(tc, "Hostname verification is enabled");
+                    }
+                }
+            }
 
             //set the ssl parameters collected on the engine
             engine.setSSLParameters(sslParameters);
@@ -1520,5 +1535,4 @@ public class SSLUtils {
         output.toArray(data);
         return data;
     }
-
 }
