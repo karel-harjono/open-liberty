@@ -1880,7 +1880,7 @@ public class WSKeyStore extends Properties {
      * Removing isGoodDNSName as we do not believe we need this any longer.
      * The check for the first character being numeric is invalid because this is allowed since RTC1123.
      * We will no longer validate hostnames before adding them into the SAN and will delegate that to the certificate creation tool
-     * 
+     *
      * public static boolean isGoodDNSName(String dnsName) {
      * if (tc.isEntryEnabled())
      * Tr.entry(tc, "isGoodDNSName", dnsName);
@@ -1931,8 +1931,9 @@ public class WSKeyStore extends Properties {
      * Tr.exit(tc, "isGoodDNSName", true);
      * return true;
      * }
+     * 
+     * }
      */
-    }
 
     /**
      * Acquire the writer lock. To be used to prevent concurrent keystore
