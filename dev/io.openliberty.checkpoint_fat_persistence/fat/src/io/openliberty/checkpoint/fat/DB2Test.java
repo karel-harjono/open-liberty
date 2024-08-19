@@ -108,7 +108,6 @@ public class DB2Test extends FATServletClient {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        server.addIgnoredErrors(Arrays.asList("CWPKI0063W"));
         ShrinkHelper.defaultApp(server, APP_NAME, "io.openliberty.checkpoint.db2.web");
 
         initDB();
@@ -135,6 +134,6 @@ public class DB2Test extends FATServletClient {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        server.stopServer();
+        server.stopServer("CWPKI0063W");
     }
 }
