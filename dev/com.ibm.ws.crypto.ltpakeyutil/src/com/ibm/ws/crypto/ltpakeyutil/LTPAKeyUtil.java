@@ -145,7 +145,7 @@ public final class LTPAKeyUtil {
 				return System.getProperty("com.ibm.jsse2.usefipsprovider");
 			}
 		});
-		if (fipsON == "true") {
+		if (fipsON.equalsIgnoreCase("true")) {
 			return true;
 		} else {
 			return false;

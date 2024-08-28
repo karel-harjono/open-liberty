@@ -20,10 +20,10 @@ import java.security.MessageDigest;
  */
 public class KeyEncryptor {
 
-    private static final String MESSAGE_DIGEST_ALGORITHM = "SHA";
-    private static final String DES_ECB_CIPHER = "DESede/ECB/PKCS5Padding";
+    private static final String MESSAGE_DIGEST_ALGORITHM = "SHA256";
+    private static final String AES_ECB_CIPHER = "AES/CBC/PKCS5Padding";
 
-    private final byte[] desKey;
+    private final byte[] aesKey;
 
     /**
      * A KeyEncryptor constructor.
@@ -33,12 +33,14 @@ public class KeyEncryptor {
     public KeyEncryptor(byte[] password) throws Exception {
         MessageDigest md = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
         byte[] digest = md.digest(password);
-        desKey = new byte[24];
-        System.arraycopy(digest, 0, desKey, 0, digest.length);
-        desKey[20] = (byte) 0x00;
-        desKey[21] = (byte) 0x00;
-        desKey[22] = (byte) 0x00;
-        desKey[23] = (byte) 0x00;
+        aesKey = new byte[32];
+        System.out.println("DEBUG KAREL: digest length " + digest.length);
+        System.out.println("DEBUG KAREL: digest length " + digest);
+        System.arraycopy(digest, 0, aesKey, 0, digest.length);
+        // aesKey[20] = (byte) 0x00;
+        // aesKey[21] = (byte) 0x00;
+        // aesKey[22] = (byte) 0x00;
+        // aesKey[23] = (byte) 0x00;
     }
 
     /**
@@ -48,10 +50,10 @@ public class KeyEncryptor {
      * @return The decrypted key
      */
     public byte[] decrypt(byte[] encryptedKey) throws Exception {
-        return LTPACrypto.decrypt(encryptedKey, desKey, DES_ECB_CIPHER);
+        return LTPACrypto.decrypt(encryptedKey, aesKey, AES_ECB_CIPHER);
     }
 
     public byte[] encrypt(byte[] key) throws Exception {
-        return LTPACrypto.encrypt(key, desKey, DES_ECB_CIPHER);
+        return LTPACrypto.encrypt(key, aesKey, AES_ECB_CIPHER);
     }
 }
