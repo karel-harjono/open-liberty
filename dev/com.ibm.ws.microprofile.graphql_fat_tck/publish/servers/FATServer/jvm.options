@@ -9,3 +9,5 @@
 
 # required for TCK:
 -Dmp.graphql.tck.endpoint.port=8010
+
+-Dcom.ibm.tools.attach.enable=no

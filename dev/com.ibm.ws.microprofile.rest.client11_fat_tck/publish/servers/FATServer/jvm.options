@@ -1,2 +1,3 @@
 -Dcom.ibm.tools.attach.enable=yes
 -Xmx1024m
+-Dcom.ibm.tools.attach.enable=no

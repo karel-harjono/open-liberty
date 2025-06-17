@@ -3,3 +3,4 @@
 -Xmx1024m
 # beta fence for HTTP tracing
 -Dcom.ibm.ws.beta.edition=true
+-Dcom.ibm.tools.attach.enable=no

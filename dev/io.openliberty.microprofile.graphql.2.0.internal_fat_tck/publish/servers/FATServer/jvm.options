@@ -6,3 +6,5 @@
 #-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=7777
 
 -Xmx1024m
+
+-Dcom.ibm.tools.attach.enable=no

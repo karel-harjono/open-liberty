@@ -1,1 +1,13 @@
--Dcom.ibm.tools.attach.enable=yes
+-Dcom.ibm.tools.attach.enable=no
+
+-Dcom.ibm.tools.attach.enable=no
+
+-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no-Dcom.ibm.tools.attach.enable=no\n
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
+-Dcom.ibm.tools.attach.enable=no
