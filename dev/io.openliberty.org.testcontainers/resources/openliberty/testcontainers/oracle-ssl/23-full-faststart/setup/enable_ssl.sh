@@ -29,7 +29,7 @@ SERVER_CERT="/tmp/oracle-server-certificate.crt"
 echo "START >>> Creating server wallet and cert"
 mkdir -p /u01/app/oracle/wallet
 orapki wallet create  -wallet $SERVER_WALLET -pwd $WALLET_PWD -auto_login
-orapki wallet add     -wallet $SERVER_WALLET -pwd $WALLET_PWD -dn $DN -keysize 1024 -self_signed -validity 36500
+orapki wallet add     -wallet $SERVER_WALLET -pwd $WALLET_PWD -dn $DN -keysize 2048 -self_signed -validity 36500
 orapki wallet display -wallet $SERVER_WALLET -pwd $WALLET_PWD
 orapki wallet export  -wallet $SERVER_WALLET -pwd $WALLET_PWD -dn $DN -cert $SERVER_CERT
 orapki cert display -cert $SERVER_CERT -complete
@@ -41,7 +41,7 @@ CLIENT_CERT="/tmp/oracle-client-certificate.crt"
 echo "START >>> Create client wallet and cert"
 mkdir -p /client/oracle/wallet
 orapki wallet create  -wallet $CLIENT_WALLET -pwd $WALLET_PWD -auto_login
-orapki wallet add     -wallet $CLIENT_WALLET -pwd $WALLET_PWD -dn $DN -keysize 1024 -self_signed -validity 36500
+orapki wallet add     -wallet $CLIENT_WALLET -pwd $WALLET_PWD -dn $DN -keysize 2048 -self_signed -validity 36500
 orapki wallet display -wallet $CLIENT_WALLET -pwd $WALLET_PWD
 orapki wallet export  -wallet $CLIENT_WALLET -pwd $WALLET_PWD -dn $DN -cert $CLIENT_CERT
 orapki cert display -cert $CLIENT_CERT -complete
