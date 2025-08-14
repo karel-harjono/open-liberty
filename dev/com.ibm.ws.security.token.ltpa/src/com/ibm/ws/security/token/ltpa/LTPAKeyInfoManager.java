@@ -27,6 +27,7 @@ import com.ibm.websphere.crypto.PasswordUtil;
 import com.ibm.websphere.ras.Tr;
 import com.ibm.websphere.ras.TraceComponent;
 import com.ibm.websphere.ras.annotation.Sensitive;
+import com.ibm.ws.common.crypto.CryptoUtils;
 import com.ibm.ws.common.encoder.Base64Coder;
 import com.ibm.ws.crypto.ltpakeyutil.KeyEncryptor;
 import com.ibm.ws.crypto.ltpakeyutil.LTPAKeyFileUtility;
@@ -203,7 +204,7 @@ public class LTPAKeyInfoManager {
      * @throws IOException
      * @throws Exception
      */
-    private void loadLtpaKeysFile(WsLocationAdmin locService, String keyImportFile, byte[] keyPassword, boolean validationKey,
+    private void loadLtpaKeysFile(WsLocationAdmin locService, String keyImportFile, @Sensitive byte[] keyPassword, boolean validationKey,
                                   OffsetDateTime validUntilDateOdt) throws IOException, Exception {
         // Need to load the key import file
         if (TraceComponent.isAnyTracingEnabled() && tc.isEventEnabled()) {
@@ -215,17 +216,30 @@ public class LTPAKeyInfoManager {
 
         if (ltpaKeyFileResource != null) {
             props = loadPropertiesFile(ltpaKeyFileResource);
+            if (CryptoUtils.isFips140_3EnabledWithBetaGuard()) {
+                //TODO: customer switch from FIPS 140-3 IBM JDK to semeru 17, any issue needs to handle?
+                String version = props.getProperty(LTPAKeyFileUtility.LTPA_VERSION_PROPERTY);
+                if (tc.isDebugEnabled()) {
+                    Tr.debug(this, tc, "LTPA key version: " + version);
+                }
+                if ("1.0".equals(version)) {
+                    if (validationKey) {
+                        Tr.warning(tc, "LTPA_VALIDATION_KEYS_NEED_TO_REGENERATE", validationKey);
+                    } else {
+                        if (tc.isDebugEnabled()) {
+                            Tr.debug(this, tc, "FIPS 140-3 is enabled;  Need to regenerate the primary key file");
+                        }
+                        renameLtpaKeyFile(locService, keyImportFile);
+                        //regenerate the primary key
+                        props = createPrimaryKeyFile(locService, keyImportFile, keyPassword);
+                    }
+                }
+            }
         } else if (validationKey) { //validationKeys file does not exist so error
             Tr.error(tc, "LTPA_KEYS_FILE_DOES_NOT_EXIST", keyImportFile);
             return;
         } else { //Primary keys file does not exist so create the primary key
-            long start = System.currentTimeMillis();
-            Tr.info(tc, "LTPA_CREATE_KEYS_START");
-
-            LTPAKeyFileCreator creator = new LTPAKeyFileCreatorImpl();
-            props = creator.createLTPAKeysFile(locService, keyImportFile, keyPassword);
-
-            Tr.audit(tc, "LTPA_CREATE_KEYS_COMPLETE", TimestampUtils.getElapsedTime(start), keyImportFile);
+            props = createPrimaryKeyFile(locService, keyImportFile, keyPassword);
         }
 
         if (props == null || props.isEmpty()) {
@@ -295,6 +309,41 @@ public class LTPAKeyInfoManager {
                 Tr.debug(this, tc, "LTPAValidationKeysInfo size: " + ltpaValidationKeysInfos.size());
             }
         }
+    }
+
+    /**
+     * @param locService
+     * @param keyImportFile
+     * @throws IOException
+     */
+    private void renameLtpaKeyFile(WsLocationAdmin locService, String keyImportFile) throws IOException {
+        WsResource ltpaFile = locService.resolveResource(keyImportFile);
+
+        if (tc.isDebugEnabled()) {
+            Tr.debug(this, tc, "Rename the LTPA key file to: " + keyImportFile + ".noFips");
+        }
+
+        //ltpaFile.delete();
+        WsResource ltpFileNoFips = locService.resolveResource(keyImportFile + ".noFips");
+        ltpaFile.moveTo(ltpFileNoFips);
+    }
+
+    /**
+     * @param locService
+     * @param keyImportFile
+     * @param keyPassword
+     * @return
+     * @throws Exception
+     */
+    private Properties createPrimaryKeyFile(WsLocationAdmin locService, String keyImportFile, @Sensitive byte[] keyPassword) throws Exception {
+        long start = System.currentTimeMillis();
+        Tr.info(tc, "LTPA_CREATE_KEYS_START");
+
+        LTPAKeyFileCreator creator = new LTPAKeyFileCreatorImpl();
+        Properties props = creator.createLTPAKeysFile(locService, keyImportFile, keyPassword);
+
+        Tr.audit(tc, "LTPA_CREATE_KEYS_COMPLETE", TimestampUtils.getElapsedTime(start), keyImportFile);
+        return props;
     }
 
     /**
