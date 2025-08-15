@@ -61,7 +61,8 @@ public class KerberosContainer extends GenericContainer<KerberosContainer> {
     @SuppressWarnings("deprecation")
     @Override
     protected void configure() {
-        //withExposedPorts(99, 464, 749);
+        // Expose port 88 and let Docker assign a random available port on the host
+        withExposedPorts(88);
         withNetworkAliases(KRB5_KDC);
         withCreateContainerCmdModifier(cmd -> {
             cmd.withHostName(KRB5_KDC);
@@ -88,38 +89,13 @@ public class KerberosContainer extends GenericContainer<KerberosContainer> {
         waitingFor(new LogMessageWaitStrategy()
                         .withRegEx("^.*KERB SETUP COMPLETE.*$")
                         .withStartupTimeout(Duration.ofSeconds(FATRunner.FAT_TEST_LOCALRUN ? 15 : 300)));
-        withCreateContainerCmdModifier(cmd -> {
-
-            List<ExposedPort> exposedPorts = new ArrayList<ExposedPort>();
-            for (ExposedPort p : cmd.getExposedPorts()) {
-                Log.info(c, "configure", "ExposedPort=" + p.getPort());
-                exposedPorts.add(p);
-            }
-            exposedPorts.add(ExposedPort.tcp(88));
-            cmd.withExposedPorts(exposedPorts);
-
-            // Add previous port bindings and KDC and LDAP ports
-            Ports ports = cmd.getPortBindings();
-            int containerPort = 88;
-            int hostPort = 88;
-
-            String kdcPortMapping = String.format("%d:%d/%s", hostPort, containerPort, InternetProtocol.TCP);
-            Log.info(c, "configure", "adding KDC port mapping: " + kdcPortMapping);
-
-            Log.info(c, "configure", "PortBinding.parse(kdcPortMapping): " + PortBinding.parse(kdcPortMapping));
-            ports.add(PortBinding.parse(kdcPortMapping));
-
-            Log.info(c, "configure", "ports: " + ports);
-            cmd.withPortBindings(ports);
-
-            cmd.withHostName(KRB5_KDC);
-        });
     }
 
     @Override
     protected void containerIsStarted(InspectContainerResponse containerInfo) {
-        String udp88 = containerInfo.getNetworkSettings().getPorts().getBindings().get(new ExposedPort(88, InternetProtocol.TCP))[0].getHostPortSpec();
-        tcp_88 = Integer.valueOf(udp88);
+        // Get the mapped port for port 88
+        tcp_88 = getMappedPort(88);
+        Log.info(c, "containerIsStarted", "Kerberos KDC port 88 mapped to host port: " + tcp_88);
     }
 
     @Override

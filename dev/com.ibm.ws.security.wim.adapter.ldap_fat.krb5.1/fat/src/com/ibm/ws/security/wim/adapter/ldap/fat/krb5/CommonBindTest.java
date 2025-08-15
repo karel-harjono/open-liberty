@@ -119,7 +119,7 @@ public class CommonBindTest {
     protected static final String UNBOUNDID_PWD = "usrpwd";
 
     static int LDAP_PORT = 389; //ApacheDSandKDC.getLdapPort();
-    static int KDC_PORT = 88; //ApacheDSandKDC.getKdcPort();
+    static int KDC_PORT; // Will be initialized in setup() with the dynamically assigned port
 
     protected static String[] stopStrings = null;
 
@@ -129,11 +129,15 @@ public class CommonBindTest {
             ldapServerHostName = ExternalDockerClientFilter.instance().getHostname();
         } // else defaulted to: localhost
         Log.info(c, "setUp", "setting ldap hostname to: " + ldapServerHostName);
+        
+        // Initialize KDC_PORT with the dynamically assigned port
+        KDC_PORT = FATSuite.kerberos.getMappedPort(88);
+        Log.info(c, "setUp", "Using dynamically assigned KDC port: " + KDC_PORT);
 
         if (conn == null) {
             KdcConfig config = KdcConfig.getDefaultConfig();
             config.setUseUdp(false);
-            config.setKdcPort(88);
+            config.setKdcPort(FATSuite.kerberos.getMappedPort(88));
             config.setHostName(FATSuite.kerberos.getHost());
             Log.info(c, "setUp", "Setting KdcConfig hostname to: " + FATSuite.kerberos.getHost());
             Set<EncryptionType> encryptionTypes = new HashSet<EncryptionType>();
