@@ -229,7 +229,7 @@ public class LTPAKeyInfoManager {
                         if (tc.isDebugEnabled()) {
                             Tr.debug(this, tc, "FIPS 140-3 is enabled;  Need to regenerate the primary key file");
                         }
-                        renameLtpaKeyFile(locService, keyImportFile);
+                        backupLtpaKeyFile(locService, keyImportFile);
                         //regenerate the primary key
                         props = createPrimaryKeyFile(locService, keyImportFile, keyPassword);
                     }
@@ -316,15 +316,17 @@ public class LTPAKeyInfoManager {
      * @param keyImportFile
      * @throws IOException
      */
-    private void renameLtpaKeyFile(WsLocationAdmin locService, String keyImportFile) throws IOException {
+    private void backupLtpaKeyFile(WsLocationAdmin locService, String keyImportFile) throws IOException {
         WsResource ltpaFile = locService.resolveResource(keyImportFile);
 
-        if (tc.isDebugEnabled()) {
-            Tr.debug(this, tc, "Rename the LTPA key file to: " + keyImportFile + ".noFips");
-        }
-
-        //ltpaFile.delete();
+        //we will back up only .noFips or .noFips.1
         WsResource ltpFileNoFips = locService.resolveResource(keyImportFile + ".noFips");
+        if (ltpFileNoFips.exists()) {
+            ltpFileNoFips = locService.resolveResource(keyImportFile + ".noFips.1");
+        }
+        if (tc.isDebugEnabled()) {
+            Tr.debug(this, tc, "Backup the LTPA key file to: " + ltpFileNoFips.getName());
+        }
         ltpaFile.moveTo(ltpFileNoFips);
     }
 
