@@ -107,14 +107,14 @@ public class Activator implements BundleActivator {
                 }
                 // OpenSAMLUtil.initSamlEngine();
 
-                ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                Thread thread = Thread.currentThread();
-                thread.setContextClassLoader(InitializationService.class.getClassLoader());
-                try {
-                    InitializationService.initialize();
-                } finally {
-                    thread.setContextClassLoader(loader);
-                }
+                //ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                //Thread thread = Thread.currentThread();
+                //thread.setContextClassLoader(InitializationService.class.getClassLoader());
+                //try {
+                InitializationService.initialize();
+                //} finally {
+                //    thread.setContextClassLoader(loader);
+                //}
 
                 // We do not need to initialize the ArtifactBuilder until we want to build SAML output
                 if (tc.isDebugEnabled()) {
