@@ -414,12 +414,12 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.6.0</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.19.0</version>
+      <version>2.15.1</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -464,7 +464,7 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>4.1.5</version>
+      <version>4.2.26</version>
     </dependency>
     <dependency>
       <groupId>io.github.classgraph</groupId>
@@ -564,57 +564,57 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-buffer</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-http2</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-http</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-socks</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-common</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler-proxy</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-resolver</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-transport-native-unix-common</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-transport</artifactId>
-      <version>4.1.124.Final</version>
+      <version>4.1.119.Final</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.arquillian</groupId>
@@ -1284,17 +1284,17 @@
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>mutiny-reactive-streams-operators-jakarta</artifactId>
-      <version>2.7.0</version>
+      <version>2.5.6</version>
     </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>mutiny-zero-flow-adapters</artifactId>
-      <version>1.1.1</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>mutiny</artifactId>
-      <version>2.7.0</version>
+      <version>2.5.6</version>
     </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
@@ -1947,6 +1947,21 @@
       <version>7.5.1</version>
     </dependency>
     <dependency>
+      <groupId>net.shibboleth</groupId>
+      <artifactId>shib-networking</artifactId>
+      <version>9.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>net.shibboleth</groupId>
+      <artifactId>shib-security</artifactId>
+      <version>9.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>net.shibboleth</groupId>
+      <artifactId>shib-support</artifactId>
+      <version>9.1.4</version>
+    </dependency>
+    <dependency>
       <groupId>net.sourceforge.cssparser</groupId>
       <artifactId>cssparser</artifactId>
       <version>0.9.23</version>
@@ -2069,7 +2084,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.18.0</version>
+      <version>3.14.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -2529,7 +2544,7 @@
     <dependency>
       <groupId>org.apache.myfaces.core</groupId>
       <artifactId>myfaces-api</artifactId>
-      <version>3.0.3</version>
+      <version>3.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.myfaces.core</groupId>
@@ -2554,7 +2569,7 @@
     <dependency>
       <groupId>org.apache.myfaces.core</groupId>
       <artifactId>myfaces-impl</artifactId>
-      <version>3.0.3</version>
+      <version>3.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.myfaces.core</groupId>
@@ -2730,11 +2745,6 @@
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-asm8-shaded</artifactId>
       <version>4.17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-      <version>1.9.24</version>
     </dependency>
     <dependency>
       <groupId>org.asynchttpclient</groupId>
@@ -3005,11 +3015,6 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-websocket</artifactId>
       <version>8.2.0.v20160908</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jnosql.communication</groupId>
-      <artifactId>jnosql-communication-semistructured</artifactId>
-      <version>1.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jnosql.mapping</groupId>
@@ -3703,8 +3708,23 @@
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.json</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
       <artifactId>javax.faces</artifactId>
       <version>2.3.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -4152,11 +4172,6 @@
       <version>6.0.0.Final</version>
     </dependency>
     <dependency>
-      <groupId>org.jctools</groupId>
-      <artifactId>jctools-core</artifactId>
-      <version>4.0.5</version>
-    </dependency>
-    <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib-common</artifactId>
       <version>1.9.0</version>
@@ -4318,6 +4333,16 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-core-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-core-impl</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-core</artifactId>
       <version>3.4.5</version>
     </dependency>
@@ -4328,8 +4353,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-messaging-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-messaging-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-messaging-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4338,8 +4373,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-profile-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-profile-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-profile-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4348,8 +4393,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-saml-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-saml-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-saml-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4358,8 +4413,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4368,13 +4433,28 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-soap-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-soap-impl</artifactId>
       <version>3.4.5</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-soap-impl</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-storage-api</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-storage-api</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4388,8 +4468,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xacml-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-xacml-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xacml-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4398,8 +4488,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xacml-saml-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-xacml-saml-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xacml-saml-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
@@ -4408,8 +4508,18 @@
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xmlsec-api</artifactId>
+      <version>5.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
       <artifactId>opensaml-xmlsec-impl</artifactId>
       <version>3.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xmlsec-impl</artifactId>
+      <version>5.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -4663,26 +4773,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-autoconfigure</artifactId>
-      <version>4.0.0-M1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-servlet</artifactId>
-      <version>4.0.0-M1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-web-server</artifactId>
-      <version>4.0.0-M1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-webmvc</artifactId>
-      <version>4.0.0-M1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
       <version>1.5.9.RELEASE</version>
     </dependency>
@@ -4695,11 +4785,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
       <version>3.3.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot</artifactId>
-      <version>4.0.0-M1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.data</groupId>
@@ -4833,11 +4918,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>7.0.0-M7</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>3.0.7.RELEASE</version>
     </dependency>
@@ -4858,11 +4938,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>7.0.0-M7</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
       <version>3.0.7.RELEASE</version>
     </dependency>
@@ -4880,11 +4955,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
       <version>6.1.14</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>7.0.0-M7</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -4970,11 +5040,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
       <version>6.1.14</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>7.0.0-M7</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -5019,57 +5084,57 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>database-commons</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>db2</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>jdbc</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>kafka</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mongodb</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mssqlserver</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>oracle-free</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>oracle-xe</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>selenium</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.21.3</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
