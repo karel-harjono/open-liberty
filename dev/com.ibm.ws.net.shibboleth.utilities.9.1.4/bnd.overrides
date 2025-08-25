@@ -1,0 +1,58 @@
+#*******************************************************************************
+# Copyright (c) 2025 IBM Corporation and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License 2.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#     IBM Corporation - initial API and implementation
+#*******************************************************************************
+-include= ~../cnf/resources/bnd/rejar.props
+bVersion=1.0
+
+Multi-Release: true
+
+WS-TraceGroup: SAML20
+
+Export-Package: \
+  net.shibboleth.utilities.java.support;version="9.1.4", \
+  net.shibboleth.utilities.java.support.*;version="9.1.4", \
+  net.shibboleth.shared.annotation;version="9.1.4", \
+  net.shibboleth.shared.collection;version="9.1.4", \
+  net.shibboleth.utilities.java.support.codec;version="9.1.4", \
+  net.shibboleth.shared.codec;version="9.1.4", \
+  net.shibboleth.shared.component;version="9.1.4", \
+  net.shibboleth.shared.logic;version="9.1.4", \
+  net.shibboleth.shared.net;version="9.1.4", \
+  net.shibboleth.shared.primitive;version="9.1.4", \
+  net.shibboleth.shared.resolver;version="9.1.4", \
+  net.shibboleth.shared.resource;version="9.1.4", \
+  net.shibboleth.shared.security;version="9.1.4", \
+  net.shibboleth.shared.xml;version="9.1.4", \
+  net.shibboleth.shared.xml.impl;version="9.1.4"
+
+Import-Package: \
+ !com.beust.jcommander, \
+ !com.beust.jcommander.converters,\
+ !org.apache.http.client.cache, \
+ !org.apache.http.impl.client.cache, \
+ !org.apache.hc.client5.http, \
+ !org.apache.hc.client5.http.*, \
+ !org.apache.hc.core5*, \
+ !org.apache.velocity.*,\
+ !org.bouncycastle.*,\
+ !org.bouncycastle.asn1,\
+ !org.bouncycastle.asn1.x500,\
+ !org.bouncycastle.asn1.x509,\
+ !org.checkerframework.checker.nullness.compatqual,\
+ javax.annotation;version=!,\
+ *
+ 
+ Include-Resource: \
+  @${repo;net.shibboleth:shib-support;9.1.4}!/!META-INF/MANIFEST.MF|META-INF/maven/*, \
+  @${repo;net.shibboleth:shib-security;9.1.4}!/!META-INF/MANIFEST.MF|META-INF/maven/*, \
+  @${repo;net.shibboleth:shib-networking;9.1.4}!/!META-INF/MANIFEST.MF|META-INF/maven/*
+

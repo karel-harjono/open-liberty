@@ -1,0 +1,198 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package com.ibm.ws.security.saml.sso20.binding;
+
+import javax.servlet.http.HttpServletRequest;
+//import javax.servlet.http.HttpServletResponse;
+//import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse; //v5 update
+
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
+
+import com.ibm.websphere.ras.Tr;
+import com.ibm.websphere.ras.TraceComponent;
+import com.ibm.ws.security.saml.Constants;
+import com.ibm.ws.security.saml.SsoConfig;
+import com.ibm.ws.security.saml.SsoOSUtil;
+import com.ibm.ws.security.saml.SsoRequest;
+import com.ibm.ws.security.saml.SsoSamlService;
+import com.ibm.ws.security.saml.TraceConstants;
+import com.ibm.ws.security.saml.error.SamlException;
+import com.ibm.ws.security.saml.sso20.internal.utils.RequestUtil;
+import com.ibm.ws.security.saml.sso20.metadata.AcsDOMMetadataProvider;
+import com.ibm.wsspi.kernel.service.utils.AtomicServiceReference;
+
+import net.shibboleth.shared.component.ComponentInitializationException;
+
+/**
+ *
+ */
+public class BasicMessageContextBuilder<InboundMessageType extends SAMLObject, OutboundMessageType extends SAMLObject, NameIdentifierType extends SAMLObject> {
+    private static TraceComponent tc = Tr.register(BasicMessageContextBuilder.class,
+                                                   TraceConstants.TRACE_GROUP,
+                                                   TraceConstants.MESSAGE_BUNDLE);
+    public static final String SAML_SSO_OS_UTIL_HELPER = "SsoOSUtilHelper";
+    protected final AtomicServiceReference<SsoOSUtil> ssoOSUtilHelper = new AtomicServiceReference<SsoOSUtil>(SAML_SSO_OS_UTIL_HELPER);
+
+    @SuppressWarnings("rawtypes")
+    static BasicMessageContextBuilder<?, ?, ?> instance = new BasicMessageContextBuilder();
+
+    public static void setInstance(BasicMessageContextBuilder<?, ?, ?> instance) {
+        BasicMessageContextBuilder.instance = instance;
+    }
+
+    public static BasicMessageContextBuilder<?, ?, ?> getInstance() {
+        return instance;
+    }
+
+    BasicMessageContext<InboundMessageType, OutboundMessageType> getBasicMessageContext(SsoSamlService ssoService) {
+        return new BasicMessageContext<InboundMessageType, OutboundMessageType>(ssoService);
+    }
+
+    BasicMessageContext<InboundMessageType, OutboundMessageType> getBasicMessageContext(SsoSamlService ssoService, HttpServletRequest request, HttpServletResponse response) {
+        return new BasicMessageContext<InboundMessageType, OutboundMessageType>(ssoService, request, response);
+    }
+
+    public BasicMessageContext<InboundMessageType, OutboundMessageType> buildAcs(HttpServletRequest req,
+                                                                                 HttpServletResponse res,
+                                                                                 SsoSamlService ssoService,
+                                                                                 String externalRelayState,
+                                                                                 SsoRequest samlRequest) throws SamlException {
+        BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext = getBasicMessageContext(ssoService, req, res);
+
+        basicMessageContext.setAndRemoveCachedRequestInfo(externalRelayState, samlRequest);
+        //basicMessageContext.setInboundMessageTransport(new HttpServletRequestAdapter(req)); //v2
+        setIdpMetadaProvider(basicMessageContext);
+
+        // 1) Parsing the samlResponse
+        decodeSamlResponse(basicMessageContext, req);
+
+        return basicMessageContext;
+    }
+
+    public BasicMessageContext<InboundMessageType, OutboundMessageType> buildSLO(HttpServletRequest req,
+                                                                                 HttpServletResponse res,
+                                                                                 SsoSamlService ssoService,
+                                                                                 String externalRelayState,
+                                                                                 SsoRequest samlRequest) throws SamlException {
+        BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext = getBasicMessageContext(ssoService, req, res);
+        basicMessageContext.setAndRemoveCachedRequestInfo(externalRelayState, samlRequest);
+        //basicMessageContext.setInboundMessageTransport(new HttpServletRequestAdapter(req)); //v2
+        setIdpMetadaProvider(basicMessageContext);
+
+        decodeSamlLogoutMessage(basicMessageContext, req);
+        return basicMessageContext;
+    }
+
+    public BasicMessageContext<InboundMessageType, OutboundMessageType> buildRsSaml(HttpServletRequest req,
+                                                                                    HttpServletResponse res,
+                                                                                    SsoSamlService ssoService,
+                                                                                    String headerCpontent,
+                                                                                    SsoRequest samlRequest) throws SamlException {
+        BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext = getBasicMessageContext(ssoService, req, res); //v3
+        //basicMessageContext.setInboundMessageTransport(new HttpServletRequestAdapter(req));
+        //decodeSamlResponse(basicMessageContext, req);
+        basicMessageContext.setMessageContext(new MessageContext()); //v3, v5
+        return basicMessageContext;
+    }
+
+    public BasicMessageContext<InboundMessageType, OutboundMessageType> buildIdp(HttpServletRequest req,
+                                                                                 HttpServletResponse res,
+                                                                                 SsoSamlService ssoService) throws SamlException {
+        BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext = getBasicMessageContext(ssoService);
+        //basicMessageContext.setInboundMessageTransport(new HttpServletRequestAdapter(req));
+        setIdpMetadaProvider(basicMessageContext);
+
+        return basicMessageContext;
+    }
+
+    public boolean decodeSamlResponse(BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext, HttpServletRequest req) throws SamlException {
+        String acsUrl = RequestUtil.getAcsUrl(basicMessageContext.getHttpServletRequest(),
+                                              Constants.SAML20_CONTEXT_PATH, // "/ibm/saml20/"
+                                              basicMessageContext.getSsoService().getProviderId(),
+                                              basicMessageContext.getSsoConfig());
+        if (tc.isDebugEnabled()) {
+            Tr.debug(tc, "acsUrl:", acsUrl);
+        }
+
+        try {
+            HTTPPostDecoder samlMessageDecoder = getSamlHttpPostDecoder(acsUrl, basicMessageContext.getSsoService().getProviderId(), req);
+            //samlMessageDecoder.decode(basicMessageContext); //v2
+            samlMessageDecoder.decode();
+            basicMessageContext.setMessageContext(samlMessageDecoder.getMessageContext());//v3?
+        } catch (Exception e) {
+            // We may want to return false, so it can be handled by the specified TrustStore
+            //throw decodeError(e, basicMessageContext); //v2
+            throw decodeError(e);
+        }
+        return true;
+    }
+
+    public boolean decodeSamlLogoutMessage(BasicMessageContext<InboundMessageType, OutboundMessageType> basicMessageContext, HttpServletRequest req) throws SamlException {
+        String sloUrl = RequestUtil.getSloUrl(basicMessageContext.getHttpServletRequest(),
+                                              Constants.SAML20_CONTEXT_PATH, // "/ibm/saml20/"
+                                              basicMessageContext.getSsoService().getProviderId(),
+                                              basicMessageContext.getSsoConfig());
+        if (tc.isDebugEnabled()) {
+            Tr.debug(tc, "SLO Url:", sloUrl);
+        }
+
+        try {
+            HTTPPostDecoder samlMessageDecoder = getSamlHttpPostDecoder(sloUrl, basicMessageContext.getSsoService().getProviderId(), req); //v3
+            //samlMessageDecoder.decode(basicMessageContext); //v2
+            samlMessageDecoder.decode();
+            basicMessageContext.setMessageContext(samlMessageDecoder.getMessageContext());
+        } catch (Exception e) {
+            // We may want to return false, so it can be handled by the specified TrustStore
+            //throw decodeError(e, basicMessageContext); //v2
+            throw decodeError(e);
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    HTTPPostDecoder getSamlHttpPostDecoder(String acsUrl, String sp, HttpServletRequest req) throws ComponentInitializationException {
+        HTTPPostDecoder decoder = ssoOSUtilHelper.getService().getSamlHttpPostDecoder(acsUrl, sp, req);
+        return decoder;
+        /*
+         * HTTPPostDecoder decoder = new Saml20HTTPPostDecoder(acsUrl);
+         * //decoder.setHttpServletRequestSupplier(new ExampleSupplier<HttpServletRequest>(req)); //v5 update
+         * //decoder.setHttpServletRequestSupplier(req); //v5 update
+         * decoder.setParserPool(XMLObjectProviderRegistrySupport.getParserPool());
+         * decoder.initialize();
+         * return decoder;
+         */
+    }
+
+    BasicMessageContext<InboundMessageType, OutboundMessageType> setIdpMetadaProvider(BasicMessageContext<InboundMessageType, OutboundMessageType> messageContext) throws SamlException {
+        SsoConfig samlConfig = messageContext.getSsoConfig();
+        AcsDOMMetadataProvider acsIdpMetadataProvider = samlConfig.getIdpMetadataProvider();
+        messageContext.setMetadataProvider(acsIdpMetadataProvider);
+        return messageContext;
+    }
+
+    public static SamlException decodeError(Exception e) {
+        String msg = e.getMessage();
+        String className = e.getClass().getName();
+        SamlException result = new SamlException("SAML20_DECODE_SAML_RESPONSE_FAILURE_LOG",
+                        //"CWWKS5018E: The SAML Token cannot be decoded or parsed. The Error message is [" + msg +
+                        //                "]. The exception name is [" + className +
+                        //                "].",
+                        e, // cause
+                        new Object[] { msg, className });
+        return result;
+    }
+
+}
