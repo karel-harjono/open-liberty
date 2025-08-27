@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import com.ibm.ws.security.saml.TraceConstants;
 import com.ibm.ws.security.saml.sso20.binding.BasicMessageContext;
 import com.ibm.ws.security.saml.sso20.internal.utils.SignatureMethods;
 
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
@@ -92,7 +93,7 @@ public class SAMLMessageXMLSignatureSecurityPolicyRule extends BaseSAMLXMLSignat
      * @param validator The prevalidator to set.
      */
     public void setSignaturePrevalidator(final SignaturePrevalidator validator) {
-        //ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this); //TODO:
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         signaturePrevalidator = validator;
     }
 
@@ -119,7 +120,7 @@ public class SAMLMessageXMLSignatureSecurityPolicyRule extends BaseSAMLXMLSignat
     // @FFDCIgnore({SecurityPolicyException.class}) //TODO: ignore new exception type
     public void evaluateProfile(BasicMessageContext<?, ?> samlMsgCtx) throws MessageHandlerException {
         processType = "Profile";
-        SAMLObject samlMsg = samlMsgCtx.getMessageContext().getMessage();
+        SAMLObject samlMsg = (SAMLObject) samlMsgCtx.getMessageContext().getMessage(); //v4 update
         if (!(samlMsg instanceof SignableSAMLObject)) {
             if (tc.isDebugEnabled()) {
                 Tr.debug(tc, "Extracted SAML message was not a SignableSAMLObject, can not process signature");
@@ -157,7 +158,7 @@ public class SAMLMessageXMLSignatureSecurityPolicyRule extends BaseSAMLXMLSignat
 
     public void evaluateProtocol(BasicMessageContext<?, ?> samlMsgCtx) throws MessageHandlerException {
         processType = "Protocol";
-        SAMLObject samlMsg = samlMsgCtx.getMessageContext().getMessage();
+        SAMLObject samlMsg = (SAMLObject) samlMsgCtx.getMessageContext().getMessage(); //v4 update
         if (!(samlMsg instanceof SignableSAMLObject)) {
             if (tc.isDebugEnabled()) {
                 Tr.debug(tc, "Extracted SAML message was not a SignableSAMLObject, can not process signature");
@@ -177,7 +178,7 @@ public class SAMLMessageXMLSignatureSecurityPolicyRule extends BaseSAMLXMLSignat
     public void evaluateResponse(BasicMessageContext<?, ?> samlMsgCtx) throws MessageHandlerException {
         processType = "Protocol";
         //SAMLObject samlMsg = samlMsgCtx.getInboundSAMLMessage(); //v2
-        SAMLObject samlMsg = samlMsgCtx.getMessageContext().getMessage(); //v3
+        SAMLObject samlMsg = (SAMLObject) samlMsgCtx.getMessageContext().getMessage(); //v3 v4 update
         if (!(samlMsg instanceof SignableSAMLObject)) {
             if (tc.isDebugEnabled()) {
                 Tr.debug(tc, "Extracted SAML message was not a SignableSAMLObject, can not process signature");
@@ -240,7 +241,7 @@ public class SAMLMessageXMLSignatureSecurityPolicyRule extends BaseSAMLXMLSignat
     protected void doEvaluate(Signature signature, SignableSAMLObject signableObject, BasicMessageContext<?, ?> samlMsgCtx) throws MessageHandlerException {
         //String contextIssuer = samlMsgCtx.getInboundMessageIssuer(); //v2
         String contextIssuer = samlMsgCtx.getInboundSamlMessageIssuer();
-        MessageContext<SAMLObject> messageContext = samlMsgCtx.getMessageContext();
+        MessageContext messageContext = samlMsgCtx.getMessageContext(); //v4 update
         SAMLPeerEntityContext peerContext = getSAMLPeerEntityContext();
 
         //String contextIssuer = peerContext.getEntityId(); // v3 this will not work in rs saml flow
