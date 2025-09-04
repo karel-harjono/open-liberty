@@ -49,6 +49,7 @@
 					</ds:X509Certificate>
 				</ds:X509Data>
 			</ds:KeyInfo>
+			<md:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#ecdh-es"/>
 		</md:KeyDescriptor>
 		<md:SingleLogoutService
 			Location="https://localhost:xxx_SpSecurePort_xxx/ibm/saml20/sp_enc_aes128/slo"

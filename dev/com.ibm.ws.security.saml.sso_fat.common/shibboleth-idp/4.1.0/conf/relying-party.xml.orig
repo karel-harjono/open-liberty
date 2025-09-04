@@ -627,9 +627,8 @@
 				</property>
 				<property name="keyTransportEncryptionAlgorithms">
 					<list>
-						<util:constant
-							static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP" />
-					</list>
+    <util:constant static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYAGREEMENT_ECDH_ES" />
+</list>
 				</property>
 			</bean>
 		</property>
@@ -652,9 +651,8 @@
 				</property>
 				<property name="keyTransportEncryptionAlgorithms">
 					<list>
-						<util:constant
-							static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP" />
-					</list>
+    <util:constant static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYAGREEMENT_ECDH_ES" />
+</list>
 				</property>
 			</bean>
 		</property>
@@ -677,9 +675,8 @@
 				</property>
 				<property name="keyTransportEncryptionAlgorithms">
 					<list>
-						<util:constant
-							static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP" />
-					</list>
+    <util:constant static-field="org.opensaml.xmlsec.encryption.support.EncryptionConstants.ALGO_ID_KEYAGREEMENT_ECDH_ES" />
+</list>
 				</property>
 			</bean>
 		</property>
