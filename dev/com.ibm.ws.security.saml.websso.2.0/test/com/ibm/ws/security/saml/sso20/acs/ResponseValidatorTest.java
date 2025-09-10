@@ -26,7 +26,10 @@ import javax.xml.namespace.QName;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.joda.time.DateTime;
+import java.time.Instant;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -107,7 +110,7 @@ public class ResponseValidatorTest {
     private static final String ISSUER_IDENTIFIER = "https://idp.example.org/SAML2";
     private static final String DESTINATION = "http://test.gdl.mex.ibm.com:9080/ibm/saml20/SAML2/acs";
 
-    private static DateTime date;
+    private static Instant date;
 
     private ResponseValidator validator;
     private String protocol = SAMLConstants.SAML20P_NS;
@@ -129,7 +132,7 @@ public class ResponseValidatorTest {
     public static void setUp() {
         outputMgr.trace("*=all");
 
-        date = new DateTime();
+        date = Instant.now();
     }
 
     public void constructorExpectations(final long clockSkew) {
@@ -345,7 +348,7 @@ public class ResponseValidatorTest {
 
     @Test
     public void testValidateIssueInstant_InvalidTime() {
-        date = new DateTime().plusYears(1000); //date time isn't within laterOkTime and EarlierTime
+        date = Instant.now().plus(1000, ChronoUnit.YEARS); //date time isn't within laterOkTime and EarlierTime
 
         mockery.checking(new Expectations() {
             {
@@ -369,7 +372,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetTo1Min() {
-        final DateTime issueInstant = new DateTime();
+        final Instant issueInstant = Instant.now();
 
         constructorExpectations(60000L);
         mockery.checking(new Expectations() {
@@ -396,7 +399,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetToZero() {
-        final DateTime issueInstant = new DateTime();
+        final Instant issueInstant = Instant.now();
 
         constructorExpectations(0L);
         mockery.checking(new Expectations() {
@@ -423,7 +426,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTimeMinus2Min_ClockSkewSetTo3Min() {
-        final DateTime issueInstant = new DateTime().minus(120000L);
+        final Instant issueInstant = Instant.now().minus(120000L, ChronoUnit.MILLIS);
         constructorExpectations(180000L);
         mockery.checking(new Expectations() {
             {
@@ -449,7 +452,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTimePlus2Min_ClockSkewSetTo3Min() {
-        final DateTime issueInstant = new DateTime().plus(120000L);
+        final Instant issueInstant = Instant.now().plus(120000L, ChronoUnit.MILLIS);
         constructorExpectations(180000L);
         mockery.checking(new Expectations() {
             {
@@ -475,7 +478,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTimeMinus2Min_ClockSkewSetTo1Min() {
-        final DateTime issueInstant = new DateTime().minus(120000L);
+        final Instant issueInstant = Instant.now().minus(120000L, ChronoUnit.MILLIS);
         constructorExpectations(60000L);
         mockery.checking(new Expectations() {
             {
@@ -501,7 +504,7 @@ public class ResponseValidatorTest {
      */
     @Test
     public void testFakeCurrentTimePlus2Min_ClockSkewSetTo1Min() {
-        final DateTime issueInstant = new DateTime().plus(120000L);
+        final Instant issueInstant = Instant.now().plus(120000L, ChronoUnit.MILLIS);
         constructorExpectations(0L);
         mockery.checking(new Expectations() {
             {

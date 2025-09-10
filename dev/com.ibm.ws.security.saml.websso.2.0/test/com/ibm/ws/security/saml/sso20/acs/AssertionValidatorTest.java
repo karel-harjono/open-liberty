@@ -26,7 +26,10 @@ import javax.xml.namespace.QName;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;
-import org.joda.time.DateTime;
+import java.time.Instant;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -126,7 +129,7 @@ public class AssertionValidatorTest {
     
     private static AssertionValidator validator;
     private static String stateTest;
-    private static DateTime date;
+    private static Instant date;
     private static QName conditionQName;
     private static String protocol = SAMLConstants.SAML20P_NS;
     private static List<Audience> listAudience = new ArrayList<Audience>();
@@ -148,7 +151,7 @@ public class AssertionValidatorTest {
         stateMachine.startsAs(SETUP);
         listConditions.add(condition);
 
-        date = new DateTime().plusYears(YEARS);
+        date = Instant.now().plus(YEARS, ChronoUnit.YEARS);
         conditionQName = OneTimeUse.DEFAULT_ELEMENT_NAME;
 
         mockery.checking(new Expectations() {
@@ -501,7 +504,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_NotBefore_IsNull() {
         stateMachine.become(stateTest);
 
-        date = new DateTime();
+        date = Instant.now();
 
         mockery.checking(new Expectations() {
             {
@@ -557,7 +560,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_NotOnOrAfter_IsBeforeNow() {
         stateMachine.become(stateTest);
 
-        date = new DateTime().minusYears(1000);
+        date = Instant.now().minus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -587,7 +590,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientNull() {
         stateMachine.become(stateTest);
 
-        date = new DateTime().plusYears(1000);
+        date = Instant.now().plus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -631,7 +634,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientNotMatch() {
         stateMachine.become(stateTest);
 
-        date = new DateTime().plusYears(1000);
+        date = Instant.now().plus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -675,7 +678,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientDoesNotMatchAcsUrl() throws SamlException {
         stateMachine.become(stateTest);
 
-        date = new DateTime().plusYears(1000);
+        date = Instant.now().plus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -745,7 +748,7 @@ public class AssertionValidatorTest {
     public void testVerifyConditions_AssertionBefore() {
         stateMachine.become(stateTest);
 
-        date = new DateTime().plusYears(1000);
+        date = Instant.now().plus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -768,7 +771,7 @@ public class AssertionValidatorTest {
     public void testVerifyConditions_AssertionAfter() {
         stateMachine.become(stateTest);
 
-        date = new DateTime().minusYears(1000);
+        date = Instant.now().minus(1000, ChronoUnit.YEARS);
 
         mockery.checking(new Expectations() {
             {
@@ -908,7 +911,7 @@ public class AssertionValidatorTest {
     @Test
     public void testVerifyAuthnStatement_SessionError() {
         listAuthn.add(authnStatement);
-        date = new DateTime().minusMinutes(3);
+        date = Instant.now().minus(3, ChronoUnit.MINUTES);
 
         mockery.checking(new Expectations() {
             {

@@ -28,7 +28,10 @@ import javax.xml.namespace.QName;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;
-import org.joda.time.DateTime;
+import java.time.Instant;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -201,7 +204,7 @@ public class WebSSOConsumerTest {
                 allowing(samlResponse).getInResponseTo();
                 will(returnValue(RESPONSE));
                 allowing(samlResponse).getIssueInstant();
-                will(returnValue(new DateTime()));
+                will(returnValue(Instant.now()));
                 allowing(samlResponse).getDestination();
                 will(returnValue(null));
                 allowing(samlResponse).getSignature();
@@ -269,7 +272,7 @@ public class WebSSOConsumerTest {
                 one(subjectConfirmationData).getNotBefore();
                 will(returnValue(null));
                 allowing(subjectConfirmationData).getNotOnOrAfter();
-                will(returnValue(new DateTime().plusYears(1000)));
+                will(returnValue(Instant.now().plus(1000, ChronoUnit.YEARS)));
                 one(subjectConfirmationData).getInResponseTo();
                 will(returnValue(RESPONSE));
                 allowing(subjectConfirmationData).getRecipient();
@@ -297,7 +300,7 @@ public class WebSSOConsumerTest {
                 will(returnValue(conditionQName));
 
                 allowing(authnStatement).getSessionNotOnOrAfter();
-                will(returnValue(new DateTime()));
+                will(returnValue(Instant.now()));
 
             }
         });

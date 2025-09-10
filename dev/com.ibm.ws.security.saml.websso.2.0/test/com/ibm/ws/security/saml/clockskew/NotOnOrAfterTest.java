@@ -23,8 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
+import java.time.Instant;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -62,11 +64,12 @@ public class NotOnOrAfterTest extends AssertionValidator {
     private static final Iterator<SubjectConfirmation> iterator = mockery.mock(Iterator.class, "iterator");
 
     private static NotOnOrAfterTest validator;
-    private static DateTime notOnOrAfter;
-    private static final DateTime systemTime = new DateTime(2015, 9, 30, 12, 0, 0, 0); // Date 2015/09/30 12:00:00:00
-    private static final long systemTimeMilliseconds = systemTime.getMillis();
+    private static Instant notOnOrAfter;
+    private static final Instant systemTime = Instant.parse("2015-09-30T12:00:00Z"); // Date 2015/09/30 12:00:00:00
+    private static final long systemTimeMilliseconds = systemTime.toEpochMilli();
     private static final long FIVE_MIN = 300000l;
     private static final long FOUR_MIN = 240000l;
+    private static Clock fixedClock;
     private static final String SAML_REQUESTINFO_ID = "response to id";
     private static final String SERVER_PROVIDER_ID = "edu";
     private static final String SERVER_NAME = "mx-gdl";
@@ -151,7 +154,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
     @AfterClass
     public static void tearDown() {
-        DateTimeUtils.setCurrentMillisSystem();
+        // Reset to system clock
+        Clock.systemDefaultZone();
     }
 
     @After
@@ -204,8 +208,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetTo5Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
@@ -239,8 +243,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetToZero() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
@@ -274,8 +278,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus1Sec_ClockSkewSetToZero() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTime.minus(1000));
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = systemTime.minus(1000, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
             {
@@ -310,8 +314,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus4Min_ClockSkewSetTo5Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds).minus(FOUR_MIN);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).minus(FOUR_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
             {
@@ -345,8 +349,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimePlus4Min_ClockSkewSetTo5Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds).plus(FOUR_MIN);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).plus(FOUR_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
             {
@@ -380,8 +384,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimeMinus4Min_ClockSkewSetTo5Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTime.minus(FOUR_MIN).getMillis());
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).minus(FOUR_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
@@ -415,8 +419,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimePlus4Min_ClockSkewSetTo5Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTime.plus(FOUR_MIN).getMillis());
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).plus(FOUR_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
@@ -450,8 +454,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus5Min_ClockSkewSetTo4Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds).minus(FIVE_MIN);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).minus(FIVE_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
             {
@@ -486,8 +490,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimePlus5Min_ClockSkewSetTo4Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTimeMilliseconds);
-        notOnOrAfter = new DateTime(systemTimeMilliseconds).plus(FIVE_MIN);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).plus(FIVE_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
             {
@@ -521,8 +525,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimeMinus5Min_ClockSkewSetTo4Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTime.minus(FIVE_MIN).getMillis());
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).minus(FIVE_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
@@ -556,8 +560,8 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimePlus5Min_ClockSkewSetTo4Min() {
-        DateTimeUtils.setCurrentMillisFixed(systemTime.plus(FIVE_MIN).getMillis());
-        notOnOrAfter = new DateTime(systemTimeMilliseconds);
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).plus(FIVE_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
             {
