@@ -20,10 +20,9 @@ import org.jmock.Mockery;
 import org.jmock.States;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-//import org.opensaml.message.MessageContext;
+import org.mockito.Mockito;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
-//import org.opensaml.saml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml.metadata.resolver.impl.DOMMetadataResolver;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AudienceRestriction;
@@ -40,7 +39,6 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.Signature;
 
@@ -53,7 +51,6 @@ import com.ibm.ws.security.saml.sso20.binding.BasicMessageContext;
 import com.ibm.ws.security.saml.sso20.binding.BasicMessageContextBuilder;
 import com.ibm.ws.security.saml.sso20.internal.utils.ForwardRequestInfo;
 import com.ibm.ws.security.saml.sso20.internal.utils.UserData;
-import com.ibm.ws.security.saml.sso20.metadata.AcsDOMMetadataProvider;
 import com.ibm.ws.webcontainer.security.WebAppSecurityConfig;
 import com.ibm.ws.webcontainer.security.WebProviderAuthenticatorHelper;
 import com.ibm.wsspi.webcontainer.servlet.IExtendedRequest;
@@ -112,9 +109,10 @@ public class CommonMockObjects {
     private final BasicMessageContextBuilder basicMessageContextBuilder = mockery.mock(BasicMessageContextBuilder.class);
 
 
-    // MessageContext/SAMLPeerEntityContext became a final class on OpenSaml v4+ and cannot be mocked directly with ClassImposteriser.
-    private MessageContext messageContext = new MessageContext();
-    private SAMLPeerEntityContext samlPeerEntityContext = new SAMLPeerEntityContext();
+     // these became final classes on OpenSaml v4+ and cannot be mocked directly with ClassImposteriser.
+    // Use Mockito which can mock final classes
+    private MessageContext messageContext = Mockito.mock(MessageContext.class);
+    private SAMLPeerEntityContext samlPeerEntityContext = Mockito.mock(SAMLPeerEntityContext.class);
 
     private final States stateMachine = mockery.states("states");
 

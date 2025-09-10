@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.joda.time.DateTime;
 import java.time.Instant;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -109,7 +110,7 @@ public class SolicitedHandlerTest {
                 will(returnValue(requestInfo));
 
                 one(requestInfo).getBirthTime();
-                will(returnValue(Instant.now()));
+                will(returnValue(new DateTime()));
 
                 one(ssoService).getConfig();
                 will(returnValue(ssoConfig));

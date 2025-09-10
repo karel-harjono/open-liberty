@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opensaml.saml.common.SAMLVersion.VERSION_11;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +28,6 @@ import javax.xml.namespace.QName;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import java.time.Instant;
-import java.time.Clock;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,6 +36,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
+import org.mockito.Mockito;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.SAMLVersion;
@@ -82,7 +81,7 @@ public class ResponseValidatorTest {
     private final BasicMessageContext context = common.getBasicMessageContext();
     private final MessageContext messageContext = common.getMessageContext();
     private final SAMLPeerEntityContext samlPeerEntityContext = common.getSAMLPeerEntityContext();
-    private final SAMLProtocolContext samlProtocolContext = mockery.mock(SAMLProtocolContext.class);
+    private final SAMLProtocolContext samlProtocolContext = Mockito.mock(SAMLProtocolContext.class);
     private final EncryptedAssertion encryptedAssertion = common.getEncryptedAssertion();
     private final EntityDescriptor entityDescriptor = common.getEntityDescriptor();
     private final HttpServletRequest request = common.getServletRequest();
@@ -91,11 +90,11 @@ public class ResponseValidatorTest {
     //private final MetadataProvider metadataProvider = common.getMetadataProvider();
     private final AcsDOMMetadataProvider acsmetadataProvider = mockery.mock(AcsDOMMetadataProvider.class);
     private final Response samlResponse = common.getSamlResponse();
-    private final SecurityParametersContext securityParametersContext = mockery.mock(SecurityParametersContext.class);
+    private final SecurityParametersContext securityParametersContext = Mockito.mock(SecurityParametersContext.class);
     private final SignatureValidationParameters signatureValidationParams = mockery.mock(SignatureValidationParameters.class);
     //private final SignatureTrustEngine signatureTrustEngine = mockery.mock(SignatureTrustEngine.class);
     //private final SecurityConfiguration securityConfig = common.getSecurityConfig();
-    private final Signature signature = common.getSignature();
+    private final org.opensaml.xmlsec.signature.Signature signature = common.getSignature();
     private final SsoConfig ssoConfig = common.getSsoConfig();
     private final SsoSamlService ssoService = common.getSsoService();
     private final Status status = common.getStatus();
@@ -348,7 +347,7 @@ public class ResponseValidatorTest {
 
     @Test
     public void testValidateIssueInstant_InvalidTime() {
-        date = Instant.now().plus(1000, ChronoUnit.YEARS); //date time isn't within laterOkTime and EarlierTime
+        date = Instant.now().plus(1000 * 365, ChronoUnit.DAYS); //date time isn't within laterOkTime and EarlierTime
 
         mockery.checking(new Expectations() {
             {
@@ -688,7 +687,7 @@ public class ResponseValidatorTest {
         }
 
         @Override
-        public boolean validate(Signature tok, CriteriaSet trustBasisCriteria) throws org.opensaml.security.SecurityException {
+        public boolean validate(org.opensaml.xmlsec.signature.Signature tok, CriteriaSet trustBasisCriteria) throws org.opensaml.security.SecurityException {
             if (trusted == null) {
                 throw new org.opensaml.security.SecurityException("This means an error happened");
             }

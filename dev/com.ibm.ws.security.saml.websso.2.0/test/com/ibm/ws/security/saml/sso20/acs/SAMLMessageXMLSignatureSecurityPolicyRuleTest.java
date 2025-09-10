@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
+import org.mockito.Mockito;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.messaging.context.SAMLProtocolContext;
@@ -64,8 +65,8 @@ public class SAMLMessageXMLSignatureSecurityPolicyRuleTest {
     private static final Assertion assertion = common.getAssertion();
     private static final MessageContext messageContext = common.getMessageContext();
     private static final SAMLPeerEntityContext samlPeerEntityContext = common.getSAMLPeerEntityContext();
-    private static final SAMLProtocolContext samlProtocolContext = mockery.mock(SAMLProtocolContext.class);
-    private static final SecurityParametersContext securityParamContext = mockery.mock(SecurityParametersContext.class);
+    private static final SAMLProtocolContext samlProtocolContext = Mockito.mock(SAMLProtocolContext.class);
+    private static final SecurityParametersContext securityParamContext = Mockito.mock(SecurityParametersContext.class);
     private static final SignatureValidationParameters signatureValidationParams = mockery.mock(SignatureValidationParameters.class);
     private static final Response samlResponse = common.getSamlResponse();
     private static final Signature signature = common.getSignature();

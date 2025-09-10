@@ -17,6 +17,8 @@ import static com.ibm.ws.security.saml.sso20.common.CommonMockObjects.SETUP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
+import org.mockito.Mockito;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.messaging.context.SAMLProtocolContext;
@@ -103,8 +106,9 @@ public class AssertionValidatorTest {
     private static final SubjectConfirmation subjectConfirmation = common.getSubjectConfirmation();
     private static final SubjectConfirmationData subjectConfirmationData = common.getSubjectConfirmationData();
 
-    private static final SAMLProtocolContext samlProtocolContext = mockery.mock(SAMLProtocolContext.class);
-    private static final SecurityParametersContext securityParamContext = mockery.mock(SecurityParametersContext.class);
+    private static final SAMLProtocolContext samlProtocolContext = Mockito.mock(SAMLProtocolContext.class);
+    private static final SecurityParametersContext securityParamContext = Mockito.mock(SecurityParametersContext.class);
+
     private static final SignatureValidationParameters signatureValidationParams = mockery.mock(SignatureValidationParameters.class);
     private static final SignatureTrustEngine signatureTrustEngine = mockery.mock(SignatureTrustEngine.class);
     private static final Audience audience = mockery.mock(Audience.class, "audience");
@@ -151,7 +155,7 @@ public class AssertionValidatorTest {
         stateMachine.startsAs(SETUP);
         listConditions.add(condition);
 
-        date = Instant.now().plus(YEARS, ChronoUnit.YEARS);
+        date = Instant.now().plus(YEARS * 365, ChronoUnit.DAYS);
         conditionQName = OneTimeUse.DEFAULT_ELEMENT_NAME;
 
         mockery.checking(new Expectations() {
@@ -164,23 +168,23 @@ public class AssertionValidatorTest {
                 will(returnValue(false));
                 allowing(context).getMessageContext();
                 will(returnValue(messageContext));
-                allowing(messageContext).getSubcontext(SAMLPeerEntityContext.class, true);
-                will(returnValue(samlPeerEntityContext));
-                allowing(messageContext).getSubcontext(SAMLPeerEntityContext.class);
-                will(returnValue(samlPeerEntityContext));
-                allowing(samlPeerEntityContext).setAuthenticated(with(any(Boolean.class)));
-                allowing(samlPeerEntityContext).getRole();
+                // allowing(messageContext).getSubcontext(SAMLPeerEntityContext.class, true);
+                // will(returnValue(samlPeerEntityContext));
+                // allowing(messageContext).getSubcontext(SAMLPeerEntityContext.class);
+                // will(returnValue(samlPeerEntityContext));
+                // allowing(samlPeerEntityContext).setAuthenticated(with(any(Boolean.class)));
+                // allowing(samlPeerEntityContext).getRole();
                 will(returnValue(role));
-                allowing(messageContext).getSubcontext(SAMLProtocolContext.class);
-                will(returnValue(samlProtocolContext));                
-                allowing(samlProtocolContext).getProtocol();
+                // allowing(messageContext).getSubcontext(SAMLProtocolContext.class);
+                // will(returnValue(samlProtocolContext));                
+                // allowing(samlProtocolContext).getProtocol();
                 will(returnValue(protocol));
-                allowing(messageContext).getSubcontext(SecurityParametersContext.class, true);
-                will(returnValue(securityParamContext));
-                allowing(messageContext).getSubcontext(SecurityParametersContext.class);
-                will(returnValue(securityParamContext));
-                allowing(securityParamContext).setSignatureValidationParameters(with(any(SignatureValidationParameters.class)));
-                allowing(securityParamContext).getSignatureValidationParameters();
+                // allowing(messageContext).getSubcontext(SecurityParametersContext.class, true);
+                // will(returnValue(securityParamContext));
+                // allowing(messageContext).getSubcontext(SecurityParametersContext.class);
+                // will(returnValue(securityParamContext));
+                // allowing(securityParamContext).setSignatureValidationParameters(with(any(SignatureValidationParameters.class)));
+                // allowing(securityParamContext).getSignatureValidationParameters();
                 will(returnValue(signatureValidationParams));
                 allowing(signatureValidationParams).getSignatureTrustEngine();
                 will(returnValue(signatureTrustEngine));
@@ -560,7 +564,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_NotOnOrAfter_IsBeforeNow() {
         stateMachine.become(stateTest);
 
-        date = Instant.now().minus(1000, ChronoUnit.YEARS);
+        date = Instant.now().minus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -590,7 +594,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientNull() {
         stateMachine.become(stateTest);
 
-        date = Instant.now().plus(1000, ChronoUnit.YEARS);
+        date = Instant.now().plus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -634,7 +638,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientNotMatch() {
         stateMachine.become(stateTest);
 
-        date = Instant.now().plus(1000, ChronoUnit.YEARS);
+        date = Instant.now().plus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -678,7 +682,7 @@ public class AssertionValidatorTest {
     public void testVerifySubject_RecipientDoesNotMatchAcsUrl() throws SamlException {
         stateMachine.become(stateTest);
 
-        date = Instant.now().plus(1000, ChronoUnit.YEARS);
+        date = Instant.now().plus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -748,7 +752,7 @@ public class AssertionValidatorTest {
     public void testVerifyConditions_AssertionBefore() {
         stateMachine.become(stateTest);
 
-        date = Instant.now().plus(1000, ChronoUnit.YEARS);
+        date = Instant.now().plus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -771,7 +775,7 @@ public class AssertionValidatorTest {
     public void testVerifyConditions_AssertionAfter() {
         stateMachine.become(stateTest);
 
-        date = Instant.now().minus(1000, ChronoUnit.YEARS);
+        date = Instant.now().minus(1000 * 365, ChronoUnit.DAYS);
 
         mockery.checking(new Expectations() {
             {
@@ -819,7 +823,7 @@ public class AssertionValidatorTest {
                 will(returnValue(listAudience));
                 when(stateMachine.is(stateTest));
 
-                allowing(audience).getAudienceURI();
+                allowing(audience).getURI();
                 will(returnValue(AUDIENCE_URL));
                 when(stateMachine.is(stateTest));
             }
@@ -880,7 +884,7 @@ public class AssertionValidatorTest {
                 will(returnValue(listAudience));
                 when(stateMachine.is(INVALID_PROVIDERID));
 
-                allowing(audience).getAudienceURI();
+                 allowing(audience).getURI();
                 will(returnValue("http://audience.ibm.com"));
                 when(stateMachine.is(INVALID_PROVIDERID));
             }
