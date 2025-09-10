@@ -17,6 +17,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
+import org.mockito.Answers;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +73,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
     private static final long FIVE_MIN = 300000l;
     private static final long FOUR_MIN = 240000l;
     private static Clock fixedClock;
+    private static MockedStatic<Instant> mockedInstant;
     private static final String SAML_REQUESTINFO_ID = "response to id";
     private static final String SERVER_PROVIDER_ID = "edu";
     private static final String SERVER_NAME = "mx-gdl";
@@ -94,6 +98,9 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
     @BeforeClass
     public static void setUp() {
+        // Initialize the MockedStatic for Instant with CALLS_REAL_METHODS
+        mockedInstant = Mockito.mockStatic(Instant.class, Answers.CALLS_REAL_METHODS);
+        
         mockery.checking(new Expectations() {
             {
                 allowing(context).getSsoConfig();
@@ -154,8 +161,22 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
     @AfterClass
     public static void tearDown() {
+        // Close the MockedStatic to avoid affecting other tests
+        if (mockedInstant != null) {
+            mockedInstant.close();
+        }
+        
         // Reset to system clock
         Clock.systemDefaultZone();
+    }
+    
+    /**
+     * Helper method to set a fixed clock for testing
+     * @param timeMillis The time in milliseconds to set the clock to
+     */
+    private static void setFixedClock(long timeMillis) {
+        fixedClock = Clock.fixed(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault());
+        mockedInstant.when(Instant::now).thenReturn(fixedClock.instant());
     }
 
     @After
@@ -208,7 +229,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetTo5Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -228,7 +249,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -243,7 +263,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTime_ClockSkewSetToZero() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -263,7 +283,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -278,7 +297,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus1Sec_ClockSkewSetToZero() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = systemTime.minus(1000, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
@@ -298,7 +317,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
             fail("SamlException was not thrown");
         } catch (SamlException ex) {
@@ -314,7 +332,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus4Min_ClockSkewSetTo5Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).minus(FOUR_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
@@ -334,7 +352,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -349,7 +366,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimePlus4Min_ClockSkewSetTo5Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).plus(FOUR_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
@@ -369,7 +386,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -384,7 +400,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimeMinus4Min_ClockSkewSetTo5Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).minus(FOUR_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds - FOUR_MIN);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -404,7 +420,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -419,7 +434,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimePlus4Min_ClockSkewSetTo5Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).plus(FOUR_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds + FOUR_MIN);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -439,7 +454,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -454,7 +468,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimeMinus5Min_ClockSkewSetTo4Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).minus(FIVE_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
@@ -474,7 +488,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
             fail("SamlException was not thrown");
         } catch (SamlException ex) {
@@ -490,7 +503,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeCurrentTimePlus5Min_ClockSkewSetTo4Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds).plus(FIVE_MIN, ChronoUnit.MILLIS);
 
         mockery.checking(new Expectations() {
@@ -510,7 +523,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -525,7 +537,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimeMinus5Min_ClockSkewSetTo4Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).minus(FIVE_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds - FIVE_MIN);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -545,7 +557,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
         } catch (SamlException ex) {
             ex.printStackTrace();
@@ -560,7 +571,7 @@ public class NotOnOrAfterTest extends AssertionValidator {
      */
     @Test
     public void testFakeSystemTimePlus5Min_ClockSkewSetTo4Min() {
-        fixedClock = Clock.fixed(Instant.ofEpochMilli(systemTimeMilliseconds).plus(FIVE_MIN, ChronoUnit.MILLIS), ZoneId.systemDefault());
+        setFixedClock(systemTimeMilliseconds + FIVE_MIN);
         notOnOrAfter = Instant.ofEpochMilli(systemTimeMilliseconds);
 
         mockery.checking(new Expectations() {
@@ -580,7 +591,6 @@ public class NotOnOrAfterTest extends AssertionValidator {
 
         try {
             validator = new NotOnOrAfterTest();
-
             validator.verifySubject();
             fail("SamlException was not thrown");
         } catch (SamlException ex) {

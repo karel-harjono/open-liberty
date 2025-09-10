@@ -182,6 +182,8 @@ instrument.classesExcludes: com/ibm/ws/security/saml/sso20/internal/resources/Sa
 	org.jmock:jmock;strategy=exact;version='2.5.1',\
 	org.mockito:mockito-core;version='4.11.0',\
 	org.mockito:mockito-inline;version='4.11.0',\
+  net.bytebuddy:byte-buddy;version=1.16.1,\
+  net.bytebuddy:byte-buddy-agent;version=1.16.1,\
 	com.ibm.ws.org.objenesis:objenesis;version='1.0',\
 	fattest.simplicity;version=latest,\
 	com.ibm.ws.security.test.common;version=latest,\
