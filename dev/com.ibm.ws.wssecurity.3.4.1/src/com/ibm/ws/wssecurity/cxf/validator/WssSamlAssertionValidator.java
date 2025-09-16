@@ -12,6 +12,7 @@
  *******************************************************************************/
 package com.ibm.ws.wssecurity.cxf.validator;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -121,14 +122,14 @@ public class WssSamlAssertionValidator extends org.apache.wss4j.dom.validate.Sam
 
         if (assertion.getSamlVersion().equals(SAMLVersion.VERSION_20)
             && assertion.getSaml2().getConditions() != null) {
-            validFrom = assertion.getSaml2().getConditions().getNotBefore();
-            validTill = assertion.getSaml2().getConditions().getNotOnOrAfter();
-            issueInstant = assertion.getSaml2().getIssueInstant();
+            validFrom = convertInstantToDateTime(assertion.getSaml2().getConditions().getNotBefore());
+            validTill = convertInstantToDateTime(assertion.getSaml2().getConditions().getNotOnOrAfter());
+            issueInstant = convertInstantToDateTime(assertion.getSaml2().getIssueInstant());
         } else if (assertion.getSamlVersion().equals(SAMLVersion.VERSION_11)
                    && assertion.getSaml1().getConditions() != null) {
-            validFrom = assertion.getSaml1().getConditions().getNotBefore();
-            validTill = assertion.getSaml1().getConditions().getNotOnOrAfter();
-            issueInstant = assertion.getSaml1().getIssueInstant();
+            validFrom = convertInstantToDateTime(assertion.getSaml1().getConditions().getNotBefore());
+            validTill = convertInstantToDateTime(assertion.getSaml1().getConditions().getNotOnOrAfter());
+            issueInstant = convertInstantToDateTime(assertion.getSaml1().getIssueInstant());
         }
         if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
             Tr.debug(tc, "futureTTL(clockSkew):" + iFutureTTL +
@@ -180,6 +181,19 @@ public class WssSamlAssertionValidator extends org.apache.wss4j.dom.validate.Sam
                 throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "invalidSAMLsecurity");
             }
         }
+    }
+
+    /**
+     * Helper method to convert java.time.Instant to org.joda.time.DateTime
+     *
+     * @param instant The Instant to convert
+     * @return DateTime equivalent of the Instant, or null if instant is null
+     */
+    private DateTime convertInstantToDateTime(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return new DateTime(instant.toEpochMilli());
     }
 
 }
