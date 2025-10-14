@@ -2318,16 +2318,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-security-saml</artifactId>
-      <version>3.5.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-security</artifactId>
-      <version>3.5.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-transports-http-hc</artifactId>
       <version>3.5.5</version>
     </dependency>
@@ -2354,11 +2344,6 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-ws-policy</artifactId>
-      <version>3.5.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-ws-security</artifactId>
       <version>3.5.5</version>
     </dependency>
     <dependency>
@@ -2805,41 +2790,6 @@
       <groupId>org.apache.ws.xmlschema</groupId>
       <artifactId>xmlschema-core</artifactId>
       <version>2.0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-bindings</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-policy</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-ws-security-common</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-ws-security-dom</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-ws-security-policy-stax</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-ws-security-stax</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wss4j</groupId>
-      <artifactId>wss4j-ws-security-web</artifactId>
-      <version>2.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
