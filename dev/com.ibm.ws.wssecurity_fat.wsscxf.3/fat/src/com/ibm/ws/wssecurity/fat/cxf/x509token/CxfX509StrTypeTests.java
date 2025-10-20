@@ -163,6 +163,7 @@ public class CxfX509StrTypeTests extends CommonTests {
 
     @Test
     //issue 23060
+    @ExpectedFFDC(value = { "org.apache.wss4j.common.ext.WSSecurityException" }, repeatAction = { EmptyAction.ID, RepeatWithEE7cbh20.ID })
     public void testCxfClientKeysMismatch() throws Exception {
 
         //issue 23060
@@ -194,7 +195,7 @@ public class CxfX509StrTypeTests extends CommonTests {
                     // msg to send from svc client to server
                     "",
                     // expected response from server
-                    "Array index out of range: 0",
+                    "The signature or decryption was invalid",
                     // msg to issue if do NOT get the expected result
                     "The test did not receive the expected exception from the server.");
 
