@@ -639,97 +639,97 @@
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-core</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-messaging-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-messaging-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-profile-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-profile-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-saml-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-saml-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-security-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-security-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-soap-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-soap-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-storage-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-storage-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xacml-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xacml-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xacml-saml-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xacml-saml-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xmlsec-api</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.openliberty.org.opensaml</groupId>
       <artifactId>opensaml-xmlsec-impl</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.2.1</version>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry.instrumentation</groupId>
