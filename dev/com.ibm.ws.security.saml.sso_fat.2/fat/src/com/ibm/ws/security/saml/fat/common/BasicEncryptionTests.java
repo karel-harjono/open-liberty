@@ -495,7 +495,10 @@ public class BasicEncryptionTests extends SAMLCommonTest {
      * @throws Exception
      */
     @Test
-    @AllowedFFDC(value = { "com.ibm.ws.security.saml.error.SamlException", "org.opensaml.xmlsec.encryption.support.DecryptionException", "org.opensaml.xmlsec.signature.support.SignatureException", "java.security.InvalidKeyException", "java.security.spec.InvalidKeySpecException", "org.apache.xml.security.signature.XMLSignatureException" })
+    @AllowedFFDC(value = { "com.ibm.ws.security.saml.error.SamlException", "org.opensaml.xmlsec.encryption.support.DecryptionException", 
+                           "org.opensaml.xmlsec.signature.support.SignatureException", "java.security.InvalidKeyException", 
+                           "java.security.spec.InvalidKeySpecException", "org.apache.xml.security.signature.XMLSignatureException", 
+                           "org.opensaml.messaging.handler.MessageHandlerException"})
     public void testEncryptionAlgorithm_AES128_RSAKey_signatureMethodAlgorithmECDSAMismatch() throws Exception {
     	if (System.getProperty("java.specification.version").matches("1\\.[789]")) {
             Log.info(thisClass, _testName, "Skipping test. idp v3 does not support EC-DH");
@@ -506,7 +509,7 @@ public class BasicEncryptionTests extends SAMLCommonTest {
         SAMLTestSettings updatedTestSettings = getTestSettings(testSettings, SP_ENCRYPTION_AES_128_EC);
         updatedTestSettings.setSamlTokenValidationData(updatedTestSettings.getSamlTokenValidationData().getNameId(), updatedTestSettings.getSamlTokenValidationData().getIssuer(), updatedTestSettings.getSamlTokenValidationData().getInResponseTo(), SAMLConstants.BAD_TOKEN_EXCHANGE, updatedTestSettings.getSamlTokenValidationData().getEncryptionKeyUser(), updatedTestSettings.getSamlTokenValidationData().getRecipient(), SAMLConstants.AES128);
 
-        String errorMsg = SAMLMessageConstants.CWWKS5007E_INTERNAL_SERVER_ERROR + ".+Failed to decrypt EncryptedData.*";
+        String errorMsg = SAMLMessageConstants.CWWKS5007E_INTERNAL_SERVER_ERROR + ".+signature method provided is weaker than the required.*";
         if (flowType.equals(SAMLConstants.SOLICITED_SP_INITIATED)) {
             errorMsg = SAMLMessageConstants.CWWKS5007E_INTERNAL_SERVER_ERROR + ".+Signature computation error.*";
         }
