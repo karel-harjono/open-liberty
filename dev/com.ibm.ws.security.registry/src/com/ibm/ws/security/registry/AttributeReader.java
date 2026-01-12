@@ -20,6 +20,7 @@ import java.util.Map;
  * Methods must not have side-effects which alter contents of the UserRegistry.
  * UserRegistry implementations must support dynamic configuration updates.
  */
+@Deprecated
 public interface AttributeReader {
 
     /**
