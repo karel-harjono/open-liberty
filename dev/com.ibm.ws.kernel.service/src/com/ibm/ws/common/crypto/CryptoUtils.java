@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2024, 2025 IBM Corporation and others.
+* Copyright (c) 2024, 2026 IBM Corporation and others.
 * All rights reserved. This program and the accompanying materials
 * are made available under the terms of the Eclipse Public License 2.0
 * which accompanies this distribution, and is available at
@@ -381,6 +381,17 @@ public class CryptoUtils {
         }
 
         return md1;
+    }
+
+    public static boolean isAlgorithmSupported(String type, String algorithm) {
+        boolean isSupported = false;
+        for (Provider provider : Security.getProviders()) {
+            if (provider.getService(type, algorithm) != null) {
+                isSupported = true;
+            }
+        }
+
+        return isSupported;
     }
 
     public static String getPropertyLowerCase(final String prop, final String defaultValue) {
