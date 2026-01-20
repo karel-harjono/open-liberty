@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Defines read-only API contract for UserRegistry implementations.
- * Methods must not have side-effects which alter contents of the UserRegistry.
- * UserRegistry implementations must support dynamic configuration updates.
+ * Defines read-only API contract for AttributeReader implementations.
+ * Methods must not have side-effects which alter contents of the AttributeReader.
+ * AttributeReader implementations must support dynamic configuration updates.
  */
 public interface AttributeReader {
 

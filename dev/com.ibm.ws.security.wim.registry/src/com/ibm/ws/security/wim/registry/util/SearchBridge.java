@@ -24,8 +24,9 @@ import javax.naming.ldap.LdapName;
 import com.ibm.websphere.ras.Tr;
 import com.ibm.websphere.ras.TraceComponent;
 import com.ibm.websphere.security.wim.Service;
+import com.ibm.websphere.security.wim.ras.WIMMessageHelper;
+import com.ibm.websphere.security.wim.ras.WIMMessageKey;
 import com.ibm.ws.ffdc.annotation.FFDCIgnore;
-import com.ibm.ws.kernel.productinfo.ProductInfo;
 import com.ibm.ws.security.registry.EntryNotFoundException;
 import com.ibm.ws.security.registry.RegistryException;
 import com.ibm.ws.security.registry.SearchResult;
@@ -34,6 +35,7 @@ import com.ibm.ws.security.wim.util.UniqueNameHelper;
 import com.ibm.wsspi.security.wim.SchemaConstants;
 import com.ibm.wsspi.security.wim.exception.EntityNotFoundException;
 import com.ibm.wsspi.security.wim.exception.EntityNotInRealmScopeException;
+import com.ibm.wsspi.security.wim.exception.InvalidIdentifierException;
 import com.ibm.wsspi.security.wim.exception.InvalidUniqueNameException;
 import com.ibm.wsspi.security.wim.exception.WIMException;
 import com.ibm.wsspi.security.wim.model.Context;
@@ -68,8 +70,6 @@ public class SearchBridge {
      */
     private String groupRDN = "cn";
 
-    private static boolean issuedBetaMessage = false;
-
     /**
      * Default constructor.
      *
@@ -96,85 +96,59 @@ public class SearchBridge {
     @FFDCIgnore(WIMException.class)
     public SearchResult getUsers(String inputPattern, int inputLimit) throws RegistryException {
         String methodName = "getUsers";
-        // initialize the return value
-        SearchResult returnValue = new SearchResult();
+        SearchResult returnValue = new SearchResult(new ArrayList<String>(), false);
+
         // bridge the APIs
         try {
-            // validate the id
             this.mappingUtils.validateId(inputPattern);
-            // separate the ID and the realm
+
             IDAndRealm idAndRealm = this.mappingUtils.separateIDAndRealm(inputPattern);
-            // create an empty root DataObject
             Root root = this.mappingUtils.getWimService().createRootObject();
-            // if realm is defined
+            String realm = idAndRealm.getRealm();
+
             if (idAndRealm.isRealmDefined()) {
-                // create the realm DataObject
-                this.mappingUtils.createRealmDataObject(root, idAndRealm.getRealm());
+                this.mappingUtils.createRealmDataObject(root, realm);
             }
 
             // search on the principalName if the input attribute is an identifier type
-            String inputAttrName = this.propertyMap.getInputUserSecurityName(idAndRealm.getRealm());
-            boolean isInputAttrIdentifier = this.mappingUtils.isIdentifierTypeProperty(inputAttrName);
+            String inputUserSecurityName = this.propertyMap.getInputUserSecurityName(realm);
+            boolean isInputAttrIdentifier = this.mappingUtils.isIdentifierTypeProperty(inputUserSecurityName);
             if (isInputAttrIdentifier)
-                inputAttrName = SchemaConstants.PROP_PRINCIPAL_NAME;
-            String outputAttrName = this.propertyMap.getOutputUserSecurityName(idAndRealm.getRealm());
+                inputUserSecurityName = SchemaConstants.PROP_PRINCIPAL_NAME;
 
-            // use the root DataGraph to create a SearchControl DataGraph
-            List<Control> controls = root.getControls();
-            SearchControl searchControl = new SearchControl();
-            if (controls != null) {
-                controls.add(searchControl);
-            }
+            SearchControl searchControl = prepareSearchControl(root);
+
+            String outputAttrName = this.propertyMap.getOutputUserSecurityName(realm);
             // d115256
             if (!this.mappingUtils.isIdentifierTypeProperty(outputAttrName)) {
                 searchControl.getProperties().add(outputAttrName);
             }
-            // set the "expression" string to "type=LoginAccount and MAP(userSecurityName)="userPattern""
-            String quote = "'";
+
             String id = idAndRealm.getId();
-            if (id.indexOf("'") != -1) {
-                quote = "\"";
-            }
-
+            String searchExpression = buildLoginAccountSearchExpression(inputUserSecurityName, id);
             // d112199
-            searchControl.setExpression("//" + Service.DO_ENTITIES + "[@xsi:type='"
-                                        + Service.DO_LOGIN_ACCOUNT + "' and " + inputAttrName + "=" + quote + id + quote + "]");
-            // d122142
-            // if limit > 0, set the search limit to limit + 1
-            if (inputLimit > 0) {
-                searchControl.setCountLimit((inputLimit + 1));
-            } else {
-                searchControl.setCountLimit((inputLimit));
-            }
+            searchControl.setExpression(searchExpression);
 
-            // Set context to use userFilter if applicable
-            Context context = new Context();
-            context.set("key", SchemaConstants.USE_USER_FILTER_FOR_SEARCH);
-            context.set("value", id);
-            root.getContexts().add(context);
+            int countLimit = getHasMoreAdjustedCountLimit(inputLimit);
+            searchControl.setCountLimit(countLimit);
+
+            addUserFilterContext(root, id);
 
             // invoke ProfileService.search with the input root DataGraph
             root = this.mappingUtils.getWimService().search(root);
-            List<Entity> returnedList = root.getEntities();
-            if (!returnedList.isEmpty()) {
-                // add the MAP(userSecurityName)s to the Result list while count < limit
+            List<Entity> returnedEntities = root.getEntities();
+
+            if (!(returnedEntities.isEmpty())) {
+                boolean hasMore = inputLimit > 0 && returnedEntities.size() > inputLimit;
                 ArrayList<String> people = new ArrayList<String>();
-                for (int count = 0; count < returnedList.size(); count++) {
-                    // d122142
-                    if ((inputLimit > 0) && (count == inputLimit)) {
-                        // set the Result boolean to true
-                        //returnValue.setHasMore();
-                        break;
-                    }
-                    Entity loginAccount = returnedList.get(count);
+                int entityCount = inputLimit > 0 ? Math.min(inputLimit, returnedEntities.size()) : returnedEntities.size();
+                for (int i = 0; i < entityCount; i++) {
+                    Entity loginAccount = returnedEntities.get(i);
                     String sName = getSecurityNameFromEntity(methodName, outputAttrName, loginAccount);
-                    if (sName != null) {
+                    if (sName != null)
                         people.add(sName);
-                    }
                 }
-                returnValue = new SearchResult(people, true);
-            } else {
-                returnValue = new SearchResult(new ArrayList<String>(), false);
+                returnValue = new SearchResult(people, hasMore);
             }
         }
         // other cases
@@ -196,190 +170,142 @@ public class SearchBridge {
                 throw new RegistryException(toCatch.getMessage(), toCatch);
             }
         }
+
         return returnValue;
     }
 
     @FFDCIgnore({ WIMException.class })
     public Map<String, Object> getAttributesForUser(final String userSecurityName, List<String> attributeNames) throws EntryNotFoundException, RegistryException {
         String methodName = "getAttributesForUser";
-
-        betaFenceCheck(methodName);
-
-        Map<String, Object> rv = new HashMap<String, Object>();
+        Map<String, Object> returnValue = new HashMap<String, Object>();
 
         // bridge the APIs
         try {
-            // validate the id and attribute list
             this.mappingUtils.validateId(userSecurityName);
             if (attributeNames == null || attributeNames.isEmpty()) {
                 throw new WIMException();
             }
-            // separate the ID and the realm
+
             IDAndRealm idAndRealm = this.mappingUtils.separateIDAndRealm(userSecurityName);
-            // create an empty root DataObject
             Root root = this.mappingUtils.getWimService().createRootObject();
-            // if realm is defined
+            String realm = idAndRealm.getRealm();
+
             if (idAndRealm.isRealmDefined()) {
-                // create the realm DataObject
-                this.mappingUtils.createRealmDataObject(root, idAndRealm.getRealm());
+                this.mappingUtils.createRealmDataObject(root, realm);
             }
 
             // search on the principalName if the input attribute is an identifier type
-            String inputAttrName = this.propertyMap.getInputUserSecurityName(idAndRealm.getRealm());
-            boolean isInputAttrIdentifier = this.mappingUtils.isIdentifierTypeProperty(inputAttrName);
+            String inputUserSecurityName = this.propertyMap.getInputUserSecurityName(realm);
+            boolean isInputAttrIdentifier = this.mappingUtils.isIdentifierTypeProperty(inputUserSecurityName);
             if (isInputAttrIdentifier)
-                inputAttrName = SchemaConstants.PROP_PRINCIPAL_NAME;
-            String outputAttrName = this.propertyMap.getOutputUserSecurityName(idAndRealm.getRealm());
+                inputUserSecurityName = SchemaConstants.PROP_PRINCIPAL_NAME;
 
-            // use the root DataGraph to create a SearchControl DataGraph
-            List<Control> controls = root.getControls();
-            SearchControl searchControl = new SearchControl();
-            if (controls != null) {
-                controls.add(searchControl);
-            }
+            SearchControl searchControl = prepareSearchControl(root);
+
+            String outputAttrName = this.propertyMap.getOutputUserSecurityName(realm);
             // d115256
             if (!this.mappingUtils.isIdentifierTypeProperty(outputAttrName)) {
                 searchControl.getProperties().add(outputAttrName);
             }
+
             // add the requested attribute names to the search control
             if (attributeNames != null && !attributeNames.isEmpty()) {
                 searchControl.getProperties().addAll(attributeNames);
             }
-            // set the "expression" string to "type=LoginAccount and MAP(userSecurityName)="userPattern""
-            String quote = "'";
+
             String id = idAndRealm.getId();
-            if (id.indexOf("'") != -1) {
-                quote = "\"";
-            }
-
+            String searchExpression = buildLoginAccountSearchExpression(inputUserSecurityName, id);
             // d112199
-            searchControl.setExpression("//" + Service.DO_ENTITIES + "[@xsi:type='"
-                                        + Service.DO_LOGIN_ACCOUNT + "' and " + inputAttrName + "=" + quote + id + quote + "]");
-            int inputLimit = 1;
-            searchControl.setCountLimit((inputLimit + 1));
+            searchControl.setExpression(searchExpression);
 
-            // Set context to use userFilter if applicable
-            Context context = new Context();
-            context.set("key", SchemaConstants.USE_USER_FILTER_FOR_SEARCH);
-            context.set("value", id);
-            root.getContexts().add(context);
+            int uniqueCount = 1;
+            int countLimit = getHasMoreAdjustedCountLimit(uniqueCount);
+            searchControl.setCountLimit(countLimit);
+
+            addUserFilterContext(root, id);
 
             // invoke ProfileService.search with the input root DataGraph
             root = this.mappingUtils.getWimService().search(root);
-            List<Entity> returnedList = root.getEntities();
-            if (!returnedList.isEmpty()) {
-                ArrayList<String> people = new ArrayList<String>();
-                for (int count = 0; count < returnedList.size(); count++) {
-                    Entity entity = returnedList.get(count);
-                    for (String attrName : attributeNames) {
-                    	// look to see if each requested attribute is available
-                    	if (!attrName.equals("*")) {
-                            if (entity.isSet(attrName)) {
-                                Object value = entity.get(attrName);
-                                if (value != null) {
-                                    Object attrValue = value;
-                                    rv.put(attrName, attrValue);
-                                }
-                            }                    		
-                    	}
-                    	// all attributes requested, return all PersonAccount attributes that are set
-                    	else {
-                            if (entity instanceof PersonAccount) {
-                                List<String> paAttrNames = PersonAccount.getPropertyNames(null);
-                                if (paAttrNames != null && !paAttrNames.isEmpty()) {
-                                    for (String paAttrName : paAttrNames) {
-                                        if (entity.isSet(paAttrName)) {
-                                            Object value = entity.get(paAttrName);
-                                            rv.put(paAttrName, value);
-                                        }
-                                    }
-                                }
-	                        } else {
-	                            if (tc.isEventEnabled()) {
-	                                Tr.event(tc, methodName + " " + "The Entity type was not compatible with PersonAccount. The entityType is : "
-	                                             + entity.getTypeName());
-	                            }
-	                        }
-                    		break;
-                    	}
-                    }
+            List<Entity> returnedEntities = root.getEntities();
+
+            boolean isUserReturnedAndUnique = returnedEntities.size() == uniqueCount;
+            if (!(isUserReturnedAndUnique)) {
+                throw new InvalidIdentifierException(WIMMessageKey.INVALID_IDENTIFIER, Tr.formatMessage(
+                                                                                            tc,
+                                                                                            WIMMessageKey.INVALID_IDENTIFIER,
+                                                                                            WIMMessageHelper.generateMsgParms(userSecurityName)));
+            }
+
+            boolean shouldGetAllAttributes = attributeNames.contains("*");
+            if (shouldGetAllAttributes) {
+                attributeNames = PersonAccount.getPropertyNames(null);
+            }
+
+            Entity entity = returnedEntities.get(0);
+            for (String attrName : attributeNames) {
+                if (entity.isSet(attrName)) {
+                    Object value = entity.get(attrName);
+                    returnValue.put(attrName, value);
                 }
             }
-        }
-        // other cases
-        catch (WIMException toCatch) {
+        } catch (WIMException toCatch) {
             BridgeUtils.handleExceptions(toCatch);
         }
 
-        return rv;
+        return returnValue;
     }
 
     @FFDCIgnore(WIMException.class)
     public SearchResult getUsersByAttribute(String attributeName, String value, int inputLimit) throws RegistryException {
-        // initialize the method name
         String methodName = "getUsersByAttribute";
+        SearchResult returnValue = new SearchResult(new ArrayList<String>(), false);
 
-        betaFenceCheck(methodName);
-
-        // initialize the return value
-        SearchResult returnValue = new SearchResult();
         try {
             if (attributeName == null || value == null) {
                 throw new WIMException();
             }
-            // create an empty root DataObject
-            Root root = this.mappingUtils.getWimService().createRootObject();
 
-            // use the root DataGraph to create a SearchControl DataGraph
-            List<Control> controls = root.getControls();
-            SearchControl searchControl = new SearchControl();
-            if (controls != null) {
-                controls.add(searchControl);
+            Root root = this.mappingUtils.getWimService().createRootObject();
+            String realm = mappingUtils.getDefaultRealmName();
+
+            if (realm != null && !realm.isEmpty()) {
+                this.mappingUtils.createRealmDataObject(root, realm);
             }
+
+            SearchControl searchControl = prepareSearchControl(root);
+
+            String outputAttrName = this.propertyMap.getOutputUserSecurityName(realm);
             // d115256
+            if (!this.mappingUtils.isIdentifierTypeProperty(outputAttrName)) {
+                searchControl.getProperties().add(outputAttrName);
+            }
             if (!this.mappingUtils.isIdentifierTypeProperty(attributeName)) {
                 // add the requested attribute name to the search control
                 searchControl.getProperties().add(attributeName);
             }
-            // determine the outputAttrName to use
-            IDAndRealm idAndRealm = this.mappingUtils.separateIDAndRealm("");
-            String outputAttrName = this.propertyMap.getOutputUserSecurityName(idAndRealm.getRealm());
-            searchControl.getProperties().add(outputAttrName);
 
-            String quote = "'";
+            String searchExpression = buildLoginAccountSearchExpression(attributeName, value);
+            // d112199
+            searchControl.setExpression(searchExpression);
 
-            searchControl.setExpression("//" + Service.DO_ENTITIES + "[@xsi:type='"
-                                        + Service.DO_LOGIN_ACCOUNT + "' and " + attributeName + "=" + quote + value + quote + "]");
-            // d122142
-            // if limit > 0, set the search limit to limit + 1
-            if (inputLimit > 0) {
-                searchControl.setCountLimit((inputLimit + 1));
-            } else {
-                searchControl.setCountLimit((inputLimit));
-            }
+            int countLimit = getHasMoreAdjustedCountLimit(inputLimit);
+            searchControl.setCountLimit(countLimit);
 
             // invoke ProfileService.search with the input root DataGraph
             root = this.mappingUtils.getWimService().search(root);
-            List<Entity> returnedList = root.getEntities();
-            if (!returnedList.isEmpty()) {
-                // add the MAP(userSecurityName)s to the Result list while count < limit
+            List<Entity> returnedEntities = root.getEntities();
+
+            if (!(returnedEntities.isEmpty())) {
+                boolean hasMore = inputLimit > 0 && returnedEntities.size() > inputLimit;
                 ArrayList<String> people = new ArrayList<String>();
-                for (int count = 0; count < returnedList.size(); count++) {
-                    // d122142
-                    if ((inputLimit > 0) && (count == inputLimit)) {
-                        // set the Result boolean to true
-                        //returnValue.setHasMore();
-                        break;
-                    }
-                    Entity entity = returnedList.get(count);
-                    String sName = getSecurityNameFromEntity(methodName, outputAttrName, entity);
-                    if (sName != null) {
+                int entityCount = inputLimit > 0 ? Math.min(inputLimit, returnedEntities.size()) : returnedEntities.size();
+                for (int i = 0; i < entityCount; i++) {
+                    Entity loginAccount = returnedEntities.get(i);
+                    String sName = getSecurityNameFromEntity(methodName, outputAttrName, loginAccount);
+                    if (sName != null)
                         people.add(sName);
-                    }
                 }
-                returnValue = new SearchResult(people, true);
-            } else {
-                returnValue = new SearchResult(new ArrayList<String>(), false);
+                returnValue = new SearchResult(people, hasMore);
             }
         }
         // other cases
@@ -627,16 +553,44 @@ public class SearchBridge {
         return entityName;
     }
 
-    private void betaFenceCheck(String methodName) throws UnsupportedOperationException {
-        // Not running beta edition, throw exception
-        if (!ProductInfo.getBetaEdition()) {
-            throw new UnsupportedOperationException("The method '" + methodName + "' can only be used with the Open Liberty BETA.");
-        } else {
-            // Running beta exception, issue message if we haven't already issued one for this class
-            if (!issuedBetaMessage) {
-                Tr.info(tc, "BETA: A beta method has been invoked for the class " + this.getClass().getName() + " for the first time.");
-                issuedBetaMessage = !issuedBetaMessage;
-            }
+    private void addUserFilterContext(Root root, String id) {
+        // Set context to use userFilter if applicable
+        Context context = new Context();
+        context.set("key", SchemaConstants.USE_USER_FILTER_FOR_SEARCH);
+        context.set("value", id);
+        root.getContexts().add(context);
+    }
+
+    /**
+     * Returns the countLimit+1 to check whether additional entries
+     * exist beyond the requested SearchResult.
+     */
+    private int getHasMoreAdjustedCountLimit(int countLimit) {
+        // d122142
+        // if limit > 0, set the search limit to limit + 1
+        return countLimit > 0 ? countLimit + 1 : countLimit;
+    }
+
+    private String buildLoginAccountSearchExpression(String inputUserSecurityName, String id) {
+        // set the "expression" string to "type=LoginAccount and MAP(userSecurityName)="userPattern""
+        String quote = "'";
+        if (id.indexOf("'") != -1) {
+            quote = "\"";
         }
+
+        return "//" + Service.DO_ENTITIES + "[@xsi:type='"
+                + Service.DO_LOGIN_ACCOUNT + "' and " + inputUserSecurityName + "=" + quote + id + quote + "]";
+    }
+
+    private SearchControl prepareSearchControl(Root root) {
+        // use the root DataGraph to create a SearchControl DataGraph
+        SearchControl searchControl = new SearchControl();
+
+        List<Control> controls = root.getControls();
+        if (controls != null) {
+            controls.add(searchControl);
+        }
+
+        return searchControl;
     }
 }
